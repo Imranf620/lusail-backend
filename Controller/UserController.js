@@ -11,7 +11,13 @@ export const Signup = catchAsyncError(async (req, res) => {
     role,
   });
 
+  const token = user.getJWTToken();
+
   res
     .status(200)
+    .cookie('token', token, {
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+    })
     .json({ success: true, message: 'User registered successfully', user });
 });
