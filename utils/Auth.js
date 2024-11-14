@@ -1,5 +1,5 @@
 import ErrorHandler from './ErrorHandler.js';
-import User from '../Modal/UserModal.js';
+import User from '../Model/UserModel.js';
 import jwt from 'jsonwebtoken';
 
 export const isUserLoggedIn = async (req, res, next) => {
@@ -17,6 +17,7 @@ export const isUserLoggedIn = async (req, res, next) => {
 
   next();
 };
+
 export const isAuthenticated = (role) => {
   return (req, res, next) => {
     if (!req.user || !req.user.role == role) {

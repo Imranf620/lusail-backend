@@ -28,6 +28,8 @@ const UserSchema = new mongoose.Schema({
   },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
+  otp: String,
+  otpExpires: Date,
   createdDate: {
     type: Date,
     default: Date.now,
@@ -56,15 +58,20 @@ UserSchema.methods.getResetPasswordToken = function () {
   // Generate a token
   const token = crypto.randomBytes(20).toString('hex');
 
-  // Hash the token and set it to resetPasswordToken field in the schema
   this.resetPasswordToken = crypto
     .createHash('sha256')
     .update(token)
     .digest('hex');
 
   this.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
-  // Return the plain token (to be sent to the user)
   return token;
+};
+
+UserSchema.methods.generateOTP = function () {
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+  this.otp = otp;
+  this.otpExpires = Date.now() + 5 * 60 * 1000;
+  return otp;
 };
 
 export default mongoose.model('User', UserSchema);
