@@ -38,6 +38,7 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
 
     res.status(200).json({
       message: 'Products retrieved successfully',
+      count: getProducts.length,
       products: getProducts,
     });
   } catch (error) {
@@ -108,10 +109,10 @@ export const updateProduct = catchAsyncError(async (req, res, next) => {
 
 export const deleteProduct = catchAsyncError(async (req, res, next) => {
   try {
-    const { productId } = req.params;
+    const { id } = req.params;
     const sellerId = req.user._id;
 
-    const productToDelete = await ProductSchema.findById(productId);
+    const productToDelete = await ProductSchema.findById(id);
 
     if (!productToDelete) {
       return next(new ErrorHandler('Product not found!', 404));
@@ -138,12 +139,12 @@ export const deleteProduct = catchAsyncError(async (req, res, next) => {
 });
 
 export const likeProduct = catchAsyncError(async (req, res, next) => {
-  const { productId } = req.params;
+  const { id } = req.params;
   const userId = req.user._id;
 
   try {
     const updatedProduct = await ProductSchema.findByIdAndUpdate(
-      productId,
+      id,
       { $addToSet: { likes: userId } },
       { new: true }
     );
@@ -163,12 +164,12 @@ export const likeProduct = catchAsyncError(async (req, res, next) => {
 });
 
 export const dislikeProduct = catchAsyncError(async (req, res, next) => {
-  const { productId } = req.params;
+  const { id } = req.params;
   const userId = req.user._id;
 
   try {
     const updatedProduct = await ProductSchema.findByIdAndUpdate(
-      productId,
+      id,
       { $pull: { likes: userId } },
       { new: true }
     );
@@ -188,10 +189,10 @@ export const dislikeProduct = catchAsyncError(async (req, res, next) => {
 });
 
 export const productViews = catchAsyncError(async (req, res, next) => {
-  const { productId } = req.params;
+  const { id } = req.params;
   try {
     const updatedProduct = await ProductSchema.findByIdAndUpdate(
-      productId,
+      id,
       { $inc: { views: 1 } },
       { new: true }
     );

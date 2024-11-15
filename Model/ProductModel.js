@@ -5,6 +5,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    maxlength: [6, 'Plate number cannot exceed 6 characters'],
   },
   price: {
     type: Number,
