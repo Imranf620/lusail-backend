@@ -26,14 +26,23 @@ export const isUserLoggedIn = async (req, res, next) => {
 };
 
 // Middleware to check if user has a specific role
-export const isAuthenticated = (role) => {
+export const isAuthenticated = (roles) => {
   return (req, res, next) => {
+    // Check if user is authenticated
     if (!req.user) {
       return next(new ErrorHandler('You are not authenticated', 401));
     }
-    if (req.user.role !== role) {
-      return next(new ErrorHandler('You are not authenticated', 403));
+
+    // Check if the user's role is in the allowed roles array
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler(
+          'You do not have permission to access this resource',
+          403
+        )
+      );
     }
+
     next();
   };
 };
