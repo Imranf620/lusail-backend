@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 import userRoute from './Route/UserRoute.js';
+import productRoute from './Route/ProductRoute.js';
 import ConnectDB from './ConnectDb/connectDB.js';
 import error from './Middleware/error.js';
 
@@ -27,6 +28,7 @@ app.use(
 app.use(cookieParser());
 
 app.use('/api/v1', userRoute);
+app.use('/api/v1', productRoute);
 
 app.use(error);
 

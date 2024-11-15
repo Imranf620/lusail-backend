@@ -67,10 +67,21 @@ export const updateProduct = catchAsyncError(async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
+    const sellerId = req.user._id;
 
     const productToUpdate = await ProductSchema.findById(id);
+
     if (!productToUpdate) {
       return next(new ErrorHandler('Product not found', 404));
+    }
+
+    if (
+      productToUpdate.seller.toString() !== sellerId.toString() &&
+      req.user.role !== 'admin'
+    ) {
+      return next(
+        new ErrorHandler('You are not authorized to update this product', 403)
+      );
     }
 
     const updatedProduct = await ProductSchema.findByIdAndUpdate(
@@ -98,13 +109,29 @@ export const updateProduct = catchAsyncError(async (req, res, next) => {
 export const deleteProduct = catchAsyncError(async (req, res, next) => {
   try {
     const { productId } = req.params;
-    const deleteProduct = await ProductSchema.findByIdAndDelete(productId);
-    if (!deleteProduct) {
+    const sellerId = req.user._id;
+
+    const productToDelete = await ProductSchema.findById(productId);
+
+    if (!productToDelete) {
       return next(new ErrorHandler('Product not found!', 404));
     }
-    res
-      .status(200)
-      .json({ message: 'Product deleted successfully!', success: true });
+
+    if (
+      productToDelete.seller.toString() !== sellerId.toString() &&
+      req.user.role !== 'admin'
+    ) {
+      return next(
+        new ErrorHandler('You are not authorized to delete this product', 403)
+      );
+    }
+
+    await productToDelete.deleteOne();
+
+    res.status(200).json({
+      message: 'Product deleted successfully!',
+      success: true,
+    });
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
   }

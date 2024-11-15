@@ -21,8 +21,18 @@ Router.post(
 );
 Router.get('/getAllProducts', getAllProducts);
 Router.get('/singleProduct', getSingleProduct);
-Router.put('/updateProduct', updateProduct);
-Router.delete('/deleteProduct', deleteProduct);
+Router.put(
+  '/updateProduct/:id',
+  isUserLoggedIn,
+  isAuthenticated(['admin', 'seller']),
+  updateProduct
+);
+Router.delete(
+  '/deleteProduct',
+  isUserLoggedIn,
+  isAuthenticated(['admin', 'seller']),
+  deleteProduct
+);
 Router.put('/likeProduct', isUserLoggedIn, likeProduct);
 Router.put('/dislikeProduct', isUserLoggedIn, dislikeProduct);
 Router.put('/productViews', productViews);
