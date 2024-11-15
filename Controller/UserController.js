@@ -50,6 +50,7 @@ export const Login = async (req, res, next) => {
     .json({
       success: true,
       message: 'User logged in successfully',
+      user,
     });
 };
 
@@ -142,7 +143,6 @@ export const UpdatePassword = catchAsyncError(async (req, res, next) => {
 
 export const ForgetPassword = catchAsyncError(async (req, res, next) => {
   const { email } = req.body;
-  // console.log(email);
 
   if (!email) {
     return next(new ErrorHandler('Please provide an email address', 400));
@@ -191,18 +191,17 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
 });
 
 export const VerifyOTP = catchAsyncError(async (req, res, next) => {
-  const { email, otp } = req.body;
+  const { otp, email } = req.body; // Include email to find user
 
-  if (!email || !otp) {
-    return next(new ErrorHandler('Please provide both email and OTP', 400));
+  if (!otp || !email) {
+    return next(new ErrorHandler('Please provide email and OTP', 400));
   }
 
   let user = await UserModel.findOne({ email });
   if (!user) {
-    return next(new ErrorHandler('User not found with this email', 404));
+    return next(new ErrorHandler('User not found', 404));
   }
 
-  // Check if the OTP matches and is not expired
   if (user.otp !== otp || user.otpExpires < Date.now()) {
     return next(new ErrorHandler('Invalid or expired OTP', 400));
   }
@@ -215,5 +214,114 @@ export const VerifyOTP = catchAsyncError(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     message: 'OTP verified successfully',
+  });
+});
+
+export const ResetPassword = catchAsyncError(async (req, res, next) => {
+  const { token } = req.params;
+
+  // Hash the token to match the stored resetPasswordToken
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  let user = await UserModel.findOne({ resetPasswordToken });
+  if (!user) {
+    return next(
+      new ErrorHandler('Invalid or expired reset password token', 400)
+    );
+  }
+
+  if (user.resetPasswordExpires < Date.now()) {
+    return next(new ErrorHandler('Reset password token has expired', 400));
+  }
+
+  const { newPassword, confirmPassword } = req.body;
+
+  if (newPassword !== confirmPassword) {
+    return next(new ErrorHandler('Passwords do not match', 400));
+  }
+
+  user.password = newPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Password reset successfully',
+  });
+});
+
+export const UpdateUserRole = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      role: req.body.role,
+    },
+    { new: true }
+  );
+
+  if (!user) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'User role updated successfully',
+  });
+});
+
+export const GetSingleUser = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findById(req.params.id);
+  if (!user) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+export const DeleteOwnProfile = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findByIdAndDelete(req.user._id);
+  if (!user) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: 'User deleted successfully',
+  });
+});
+
+export const DeleteUserProfile = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findByIdAndDelete(req.params.id);
+  if (!user) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: 'User deleted successfully',
+  });
+});
+
+export const UpdateUserProfile = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      name: req.body.name,
+      email: req.body.email,
+    },
+    { new: true }
+  );
+
+  if (!user) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: 'User updated successfully',
+    user,
   });
 });
