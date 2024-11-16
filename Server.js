@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 
 import userRoute from './Route/UserRoute.js';
 import productRoute from './Route/ProductRoute.js';
+import orderRoute from './Route/OrderRoute.js';
 import ConnectDB from './ConnectDb/connectDB.js';
 import error from './Middleware/error.js';
 
@@ -29,6 +30,7 @@ app.use(cookieParser());
 
 app.use('/api/v1', userRoute);
 app.use('/api/v1', productRoute);
+app.use('/api/v1', orderRoute);
 
 app.use(error);
 
