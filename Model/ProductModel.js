@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
+  category:{
+    type:String,
+    required:true
+  },
   plateNo: {
     type: String,
     required: true,
