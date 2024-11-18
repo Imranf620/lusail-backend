@@ -19,6 +19,10 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  availability:{
+    type:String,
+    default:'active'
+  },
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
