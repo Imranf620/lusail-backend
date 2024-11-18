@@ -4,7 +4,7 @@ import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 
 export const createProduct = catchAsyncError(async (req, res, next) => {
   try {
-    const { category, plateNo, price, discount, active } = req.body;
+    const { category, plateNo, price, discount, availability } = req.body;
     const seller = req.user._id;
 
     const findPlateNO = await ProductSchema.findOne({ plateNo });
@@ -18,7 +18,7 @@ export const createProduct = catchAsyncError(async (req, res, next) => {
       price,
       discount,
       seller,
-      active
+      availability
     });
 
     await newProduct.save();
