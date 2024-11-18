@@ -4,7 +4,7 @@ import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 
 export const createProduct = catchAsyncError(async (req, res, next) => {
   try {
-    const { category, plateNo, price, discount,active } = req.body;
+    const { category, plateNo, price, discount, active } = req.body;
     const seller = req.user._id;
 
     const findPlateNO = await ProductSchema.findOne({ plateNo });
@@ -217,8 +217,12 @@ export const filterProducts = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Category required!", 401));
   }
   const products = await ProductSchema.find({ category });
-  if (products.length < 1) {
-    return next(new ErrorHandler("NO product found!", 404));
+  if (products.length === 0) {
+    return res.status(200).json({
+      success: true,
+      message: "No products found for this category.",
+      products: [],
+    });
   }
   res.status(200).json({ success: true, message: "Products Retreived successfully", products });
 })
