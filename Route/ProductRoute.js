@@ -21,7 +21,7 @@ Router.post(
   createProduct
 );
 Router.get('/getAllProducts', getAllProducts);
-Router.get('/filteredProducts', filterProducts);
+Router.post('/filteredProducts', filterProducts);
 Router.get('/singleProduct/:id', getSingleProduct);
 Router.put(
   '/updateProduct/:id',
