@@ -56,10 +56,10 @@ export const getProductsOfSeller = catchAsyncError(async (req, res, next) => {
     const products = await ProductSchema.find({ seller: sellerId });
 
     if (!products.length) {
-      return res.status(200).json({ message: 'No products found' });
+      res.status(200).json({ message: 'No products found' });
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       message: 'Products received successfully!',
       count: products.length,
       products,
