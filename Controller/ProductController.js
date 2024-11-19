@@ -18,7 +18,7 @@ export const createProduct = catchAsyncError(async (req, res, next) => {
       price,
       discount,
       seller,
-      availability
+      availability,
     });
 
     await newProduct.save();
@@ -50,16 +50,24 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
 
 export const getProductsOfSeller = catchAsyncError(async (req, res, next) => {
   try {
-    const sellerId = req.user._id;
-    const products = await ProductSchema.find({ sellerId });
+    const sellerId = req.user._id; // Assuming `req.user._id` is available
+
+    // Query with the correct field name
+    const products = await ProductSchema.find({ seller: sellerId });
+
     if (!products.length) {
-      res.status(200).json({ message: "No products found" });
+      return res.status(200).json({ message: 'No products found' });
     }
-    res.status(200).json({ message: "Products received successfully!", products: products, count: products.length })
+
+    return res.status(200).json({
+      message: 'Products received successfully!',
+      count: products.length,
+      products,
+    });
   } catch (error) {
-    return next(new ErrorHandler(error.message,500))
+    return next(new ErrorHandler(error.message, 500));
   }
-})
+});
 
 export const getSingleProduct = catchAsyncError(async (req, res, next) => {
   try {
@@ -227,15 +235,19 @@ export const productViews = catchAsyncError(async (req, res, next) => {
 export const filterProducts = catchAsyncError(async (req, res, next) => {
   const { category } = req.body;
   if (!category) {
-    return next(new ErrorHandler("Category required!", 401));
+    return next(new ErrorHandler('Category required!', 401));
   }
   const products = await ProductSchema.find({ category });
   if (products.length === 0) {
     return res.status(200).json({
       success: true,
-      message: "No products found for this category.",
+      message: 'No products found for this category.',
       products: [],
     });
   }
-  res.status(200).json({ success: true, message: "Products Retreived successfully", products });
-})
+  res.status(200).json({
+    success: true,
+    message: 'Products Retreived successfully',
+    products,
+  });
+});
