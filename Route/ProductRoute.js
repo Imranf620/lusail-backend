@@ -5,6 +5,7 @@ import {
   dislikeProduct,
   filterProducts,
   getAllProducts,
+  getProductsOfSeller,
   getSingleProduct,
   likeProduct,
   productViews,
@@ -36,6 +37,7 @@ Router.delete(
   deleteProduct
 );
 Router.put('/likeProduct/:id', isUserLoggedIn, likeProduct);
+Router.get('/get-seller-products',isUserLoggedIn,getProductsOfSeller)
 Router.put('/dislikeProduct/:id', isUserLoggedIn, dislikeProduct);
 Router.put('/productViews/:id', productViews);
 

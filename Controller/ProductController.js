@@ -48,6 +48,19 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
   }
 });
 
+export const getProductsOfSeller = catchAsyncError(async (req, res, next) => {
+  try {
+    const sellerId = req.user._id;
+    const products = await ProductSchema.find({ sellerId });
+    if (!products.length) {
+      res.status(200).json({ message: "No products found" });
+    }
+    res.status(200).json({ message: "Products received successfully!", products: products, count: products.length })
+  } catch (error) {
+    return next(new ErrorHandler(error.message,500))
+  }
+})
+
 export const getSingleProduct = catchAsyncError(async (req, res, next) => {
   try {
     const { id } = req.params;
