@@ -28,6 +28,10 @@ const productSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  sellerName:{
+    type:String,
+    required:true
+  },
   buyer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

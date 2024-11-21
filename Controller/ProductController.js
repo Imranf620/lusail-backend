@@ -36,24 +36,29 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
     const getProducts = await ProductSchema.find();
 
     if (getProducts.length < 1) {
-      return next(new ErrorHandler('No products found', 404));
-    }
-    
-    const sellerIds = [...new Set(getProducts.map(product=>product.seller))];
-    const sellers = await UserModel.find({_id:{$in:sellerIds}});
-    if(sellers.length === 0){
-      return next(new ErrorHandler('No seller found for this product!',404));
+      return res.status(200).json({ message: "No Products found!", success: true });
     }
 
-    const sellerNames = sellers.map(seller=>seller.name)
+    const sellerIds = [...new Set(getProducts.map(product => product.seller))];
+    
+    const sellers = await UserModel.find({ _id: { $in: sellerIds } }, 'name'); 
+
+    const sellerMap = sellers.reduce((acc, seller) => {
+      acc[seller._id] = seller.name;
+      return acc;
+    }, {});
+
+    const productsWithSellerName = getProducts.map(product => ({
+      ...product._doc,
+      sellerName: sellerMap[product.seller] || "Unknown Seller",
+    }));
 
     res.status(200).json({
       message: 'Products retrieved successfully',
       count: getProducts.length,
-      products: getProducts,
-      sellers:sellerNames
+      products: productsWithSellerName,
     });
-    
+
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
   }
