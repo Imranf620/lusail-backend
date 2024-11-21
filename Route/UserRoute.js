@@ -12,7 +12,6 @@ import {
   UpdatePassword,
   UpdateProfile,
   UpdateUserProfile,
-  UpdateUserRole,
   VerifyOTP,
 } from '../Controller/UserController.js';
 import { isUserLoggedIn, isAuthenticated } from '../utils/Auth.js';
@@ -35,12 +34,6 @@ Router.put('/updatePassword', isUserLoggedIn, UpdatePassword);
 Router.post('/forgetPassword', ForgetPassword);
 Router.post('/verifyOTP', VerifyOTP);
 Router.put('/resetPassword/:token', ResetPassword);
-Router.put(
-  '/updateuserrole/:id',
-  isUserLoggedIn,
-  isAuthenticated('admin'),
-  UpdateUserRole
-);
 Router.get(
   '/user/:id',
   isUserLoggedIn,

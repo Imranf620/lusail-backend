@@ -259,25 +259,6 @@ export const ResetPassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const UpdateUserRole = catchAsyncError(async (req, res, next) => {
-  const user = await UserModel.findByIdAndUpdate(
-    req.params.id,
-    {
-      role: req.body.role,
-    },
-    { new: true }
-  );
-
-  if (!user) {
-    return next(new ErrorHandler('User not found', 404));
-  }
-
-  res.status(200).json({
-    success: true,
-    message: 'User role updated successfully',
-  });
-});
-
 export const GetSingleUser = catchAsyncError(async (req, res, next) => {
   const user = await UserModel.findById(req.params.id);
   if (!user) {
@@ -316,6 +297,7 @@ export const UpdateUserProfile = catchAsyncError(async (req, res, next) => {
     req.params.id,
     {
       name: req.body.name,
+      role: req.body.role,
       email: req.body.email,
     },
     { new: true }
