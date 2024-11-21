@@ -1,4 +1,5 @@
 import ProductSchema from '../Model/ProductModel.js';
+import UserModel from '../Model/UserModel.js';
 import ErrorHandler from '../utils/ErrorHandler.js';
 import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 
@@ -37,12 +38,22 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
     if (getProducts.length < 1) {
       return next(new ErrorHandler('No products found', 404));
     }
+    
+    const sellerIds = [...new Set(getProducts.map(product=>product.seller))];
+    const sellers = await UserModel.find({_id:{$in:sellerIds}});
+    if(sellers.length === 0){
+      return next(new ErrorHandler('No seller found for this product!',404));
+    }
+
+    const sellerNames = sellers.map(seller=>seller.name)
 
     res.status(200).json({
       message: 'Products retrieved successfully',
       count: getProducts.length,
       products: getProducts,
+      sellers:sellerNames
     });
+    
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
   }
