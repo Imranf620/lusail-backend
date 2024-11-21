@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
-  category:{
-    type:String,
-    required:true
+  category: {
+    type: String,
+    required: true
   },
   plateNo: {
     type: String,
@@ -19,18 +19,17 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  availability:{
-    type:String,
-    default:'active'
+  availability: {
+    type: String,
+    default: 'active'
   },
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  sellerName:{
-    type:String,
-    required:true
+  sellerName: {
+    type: String
   },
   buyer: {
     type: mongoose.Schema.Types.ObjectId,
