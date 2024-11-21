@@ -41,7 +41,7 @@ Router.put(
   isAuthenticated('admin'),
   UpdateUserRole
 );
-Router.post(
+Router.get(
   '/user/:id',
   isUserLoggedIn,
   isAuthenticated('admin'),
