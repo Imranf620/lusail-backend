@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const productSchema = new mongoose.Schema({
   category: {
     type: String,
-    required: true
+    required: true,
   },
   plateNo: {
     type: String,
@@ -15,13 +15,20 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  discount: {
+  discountpercent: {
+    type: Number,
+    default: 0,
+    required: true,
+    min: [0, 'Discount percent cannot be negative'],
+    max: [100, 'Discount percent cannot exceed 100'],
+  },
+  discountedPrice: {
     type: Number,
     default: 0,
   },
   availability: {
     type: String,
-    default: 'active'
+    default: 'active',
   },
   seller: {
     type: mongoose.Schema.Types.ObjectId,
@@ -29,7 +36,7 @@ const productSchema = new mongoose.Schema({
     required: true,
   },
   sellerName: {
-    type: String
+    type: String,
   },
   buyer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -49,6 +56,24 @@ const productSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+productSchema.pre('save', function (next) {
+  if (this.price && this.discountpercent >= 0) {
+    this.discountedPrice =
+      this.price - (this.price * this.discountpercent) / 100;
+  }
+  next();
+});
+
+productSchema.pre('findOneAndUpdate', function (next) {
+  const update = this.getUpdate();
+  if (update.price && update.discountpercent !== undefined) {
+    const discountedPrice =
+      update.price - (update.price * update.discountpercent) / 100;
+    this.setUpdate({ ...update, discountedPrice });
+  }
+  next();
 });
 
 export default mongoose.model('Product', productSchema);
