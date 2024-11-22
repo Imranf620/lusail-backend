@@ -5,7 +5,8 @@ import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 
 export const createProduct = catchAsyncError(async (req, res, next) => {
   try {
-    const { category, plateNo, price, discount, availability } = req.body;
+    const { category, plateNo, price, discountpercent, availability } =
+      req.body;
     const seller = req.user._id;
 
     const findPlateNO = await ProductSchema.findOne({ plateNo });
@@ -17,14 +18,14 @@ export const createProduct = catchAsyncError(async (req, res, next) => {
       category,
       plateNo,
       price,
-      discount,
+      discountpercent,
       seller,
       availability,
     });
 
     await newProduct.save();
     res
-      .status(201)
+      .status(200)
       .json({ message: 'Product created successfully', product: newProduct });
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
@@ -36,21 +37,25 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
     const getProducts = await ProductSchema.find();
 
     if (getProducts.length < 1) {
-      return res.status(200).json({ message: "No Products found!", success: true });
+      return res
+        .status(200)
+        .json({ message: 'No Products found!', success: true });
     }
 
-    const sellerIds = [...new Set(getProducts.map(product => product.seller))];
-    
-    const sellers = await UserModel.find({ _id: { $in: sellerIds } }, 'name'); 
+    const sellerIds = [
+      ...new Set(getProducts.map((product) => product.seller)),
+    ];
+
+    const sellers = await UserModel.find({ _id: { $in: sellerIds } }, 'name');
 
     const sellerMap = sellers.reduce((acc, seller) => {
       acc[seller._id] = seller.name;
       return acc;
     }, {});
 
-    const productsWithSellerName = getProducts.map(product => ({
+    const productsWithSellerName = getProducts.map((product) => ({
       ...product._doc,
-      sellerName: sellerMap[product.seller] || "Unknown Seller",
+      sellerName: sellerMap[product.seller] || 'Unknown Seller',
     }));
 
     res.status(200).json({
@@ -58,7 +63,6 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
       count: getProducts.length,
       products: productsWithSellerName,
     });
-
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
   }
