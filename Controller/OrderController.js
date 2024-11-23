@@ -4,11 +4,10 @@ import ProductModel from '../Model/ProductModel.js';
 import ErrorHandler from '../utils/ErrorHandler.js';
 
 export const createOrder = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params; // Product ID from the URL
-  const seller = req.user._id; // Assuming req.user contains authenticated user info
-  const buyer = req.user._id; // Assuming buyer is also the logged-in user
+  const { id } = req.params;
+  const seller = req.user._id;
+  const buyer = req.user._id;
 
-  // Validate input
   if (!id || !seller || !buyer) {
     return next(
       new ErrorHandler(
@@ -18,21 +17,28 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
     );
   }
 
-  // Check if the product exists
   const findProduct = await ProductModel.findById(id);
   if (!findProduct) {
     return next(new ErrorHandler('Product not found!', 404));
   }
 
-  // Create the order
   const order = await OrderModel.create({
     seller,
     buyer,
-    plateNO: findProduct._id, // Assuming plateNO corresponds to the product ID
-    price: findProduct.price, // Assign the product price
+    plateNO: findProduct._id,
+    price: findProduct.price,
   });
 
-  // Send success response
+  const populatedOrder = await OrderModel.findById(order._id)
+    .populate('seller', 'name')
+    .populate('buyer', 'name')
+    .populate('plateNO', 'plateNo');
+
+  order.sellerName = populatedOrder.seller.name;
+  order.buyerName = populatedOrder.buyer.name;
+  order.plateNoDetails = populatedOrder.plateNO.plateNo;
+  await order.save();
+
   res.status(201).json({
     success: true,
     message: 'Order created successfully',
