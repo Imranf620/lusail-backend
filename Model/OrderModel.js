@@ -20,6 +20,18 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  sellerName: {
+    type: String,
+    default: null,
+  },
+  buyerName: {
+    type: String,
+    default: null,
+  },
+  plateNoDetails: {
+    type: String,
+    default: null,
+  },
   orderStatus: {
     type: String,
     default: 'Pending',
