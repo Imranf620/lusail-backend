@@ -27,6 +27,7 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
     buyer,
     plateNO: findProduct._id,
     price: findProduct.price,
+    discountedPrice: findProduct.discountedPrice,
   });
 
   const populatedOrder = await OrderModel.findById(order._id)
