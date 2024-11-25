@@ -1,11 +1,13 @@
 import UserModel from '../Model/UserModel.js';
 import ErrorHandler from '../utils/ErrorHandler.js';
 import nodemailer from 'nodemailer';
+import { sendMail } from '../sendCustomMail.js';
 import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 
 export const Signup = catchAsyncError(async (req, res) => {
   const { name, email, password, role } = req.body;
 
+  // Create the user
   const user = await UserModel.create({
     name,
     email,
@@ -15,6 +17,13 @@ export const Signup = catchAsyncError(async (req, res) => {
 
   const token = user.getJWTToken();
 
+  // Send Welcome Email
+  const subject = 'Welcome to Our Website!';
+  const text = `Hi ${name},\n\nThank you for signing up on our website. We hope you have a great experience.\n\nBest regards,\nYour Company Team`;
+
+  await sendMail({ to: email, subject, text });
+
+  // Respond to the client
   res
     .status(200)
     .cookie('token', token, {
