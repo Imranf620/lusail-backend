@@ -175,7 +175,7 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
 <p>If you did not make this request, please ignore this email. Rest assured, your account is safe.</p>
 <p>If you need further assistance, feel free to reach out to us!</p>
 <p>Best regards,<br>Your Lusail Numbers plate Team</p>
-`
+`;
     await sendMail({
       to: email,
       subject: 'Password Reset OTP',
@@ -223,7 +223,9 @@ export const VerifyOTP = catchAsyncError(async (req, res, next) => {
 });
 
 export const ResetPassword = catchAsyncError(async (req, res, next) => {
-  const { newPassword } = req.body;
+  const { newPassword, email } = req.body;
+
+  const user = await UserModel.findOne({ email });
 
   if (!newPassword) {
     return next(new ErrorHandler('Password required', 400));
