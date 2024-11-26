@@ -5,8 +5,9 @@ import ErrorHandler from '../utils/ErrorHandler.js';
 
 export const createOrder = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
-  const seller = req.user._id;
+  // const seller = req.user._id;
   const buyer = req.user._id;
+
 
   if (!id || !seller || !buyer) {
     return next(
@@ -20,6 +21,11 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
   const findProduct = await ProductModel.findById(id);
   if (!findProduct) {
     return next(new ErrorHandler('Product not found!', 404));
+  }
+  const seller = findProduct.seller;
+
+  if (!seller) {
+    return next(new ErrorHandler('Seller not found for this product.', 404));
   }
 
   const order = await OrderModel.create({
