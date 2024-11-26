@@ -223,34 +223,13 @@ export const VerifyOTP = catchAsyncError(async (req, res, next) => {
 });
 
 export const ResetPassword = catchAsyncError(async (req, res, next) => {
-  const { token } = req.params;
+  const { newPassword } = req.body;
 
-  // Hash the token to match the stored resetPasswordToken
-  const resetPasswordToken = crypto
-    .createHash('sha256')
-    .update(token)
-    .digest('hex');
-
-  let user = await UserModel.findOne({ resetPasswordToken });
-  if (!user) {
-    return next(
-      new ErrorHandler('Invalid or expired reset password token', 400)
-    );
-  }
-
-  if (user.resetPasswordExpires < Date.now()) {
-    return next(new ErrorHandler('Reset password token has expired', 400));
-  }
-
-  const { newPassword, confirmPassword } = req.body;
-
-  if (newPassword !== confirmPassword) {
-    return next(new ErrorHandler('Passwords do not match', 400));
+  if (!newPassword) {
+    return next(new ErrorHandler('Password required', 400));
   }
 
   user.password = newPassword;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpires = undefined;
   await user.save();
 
   res.status(200).json({

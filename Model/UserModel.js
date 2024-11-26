@@ -26,8 +26,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  resetPasswordToken: String,
-  resetPasswordExpires: Date,
   otp: String,
   otpExpires: Date,
   createdDate: {
@@ -52,19 +50,6 @@ UserSchema.methods.getJWTToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
-};
-
-UserSchema.methods.getResetPasswordToken = function () {
-  // Generate a token
-  const token = crypto.randomBytes(20).toString('hex');
-
-  this.resetPasswordToken = crypto
-    .createHash('sha256')
-    .update(token)
-    .digest('hex');
-
-  this.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
-  return token;
 };
 
 UserSchema.methods.generateOTP = function () {
