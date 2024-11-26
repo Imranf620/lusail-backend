@@ -5,16 +5,11 @@ import ErrorHandler from '../utils/ErrorHandler.js';
 
 export const createOrder = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
-  // const seller = req.user._id;
   const buyer = req.user._id;
 
-
-  if (!id || !seller || !buyer) {
+  if (!id || !buyer) {
     return next(
-      new ErrorHandler(
-        'Invalid input: Product ID, seller, and buyer are required.',
-        400
-      )
+      new ErrorHandler('Invalid input: Product ID and buyer are required.', 400)
     );
   }
 
@@ -22,14 +17,19 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
   if (!findProduct) {
     return next(new ErrorHandler('Product not found!', 404));
   }
-  const seller = findProduct.seller;
+
+  const productWithSeller = await ProductModel.findById(id).populate(
+    'seller',
+    'name'
+  );
+  const seller = productWithSeller.seller;
 
   if (!seller) {
     return next(new ErrorHandler('Seller not found for this product.', 404));
   }
 
   const order = await OrderModel.create({
-    seller,
+    seller: seller._id,
     buyer,
     plateNO: findProduct._id,
     price: findProduct.price,
