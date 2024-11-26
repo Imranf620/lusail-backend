@@ -55,16 +55,28 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
 
 export const userOrders = catchAsyncError(async (req, res, next) => {
   try {
-    const user = req.user._id;
-    const products = ProductModel.find(user);
-    if (!products) {
-      res.status(201).json({ message: 'Orders not found!' });
+    const userId = req.user._id;
+
+    // Find products where the user is either the buyer or seller
+    const products = await OrderModel.find({
+      $or: [{ seller: userId }, { buyer: userId }],
+    });
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({
+        message: 'Orders not found!',
+        success: false,
+      });
     }
-    res
-      .status(200)
-      .json({ message: 'Order fetched successfully', success: true, products });
+
+    res.status(200).json({
+      message: 'Orders fetched successfully',
+      success: true,
+      count: products.length,
+      products,
+    });
   } catch (error) {
-    next(error.message);
+    next(new Error(error.message)); // Pass a proper error object to `next`
   }
 });
 
