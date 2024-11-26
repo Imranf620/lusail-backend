@@ -5,6 +5,7 @@ import {
   deleteOrder,
   getAllOrders,
   statusUpdate,
+  userOrders,
 } from '../Controller/OrderController.js';
 
 const Router = express.Router();
@@ -28,5 +29,7 @@ Router.get(
   isAuthenticated('admin'),
   getAllOrders
 );
+
+Router.get('/user-orders',isUserLoggedIn,isAuthenticated(['admin', 'seller']),userOrders)
 
 export default Router;
