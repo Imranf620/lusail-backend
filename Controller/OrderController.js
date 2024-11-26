@@ -58,13 +58,15 @@ export const userOrders = catchAsyncError(async (req, res, next) => {
     const user = req.user._id;
     const products = ProductModel.find(user);
     if (!products) {
-      res.status(201).json({ message: "Orders not found!" })
+      res.status(201).json({ message: 'Orders not found!' });
     }
-    res.status(200).json({ message: "Order fetched successfully", success: true, products });
+    res
+      .status(200)
+      .json({ message: 'Order fetched successfully', success: true, products });
   } catch (error) {
-    next(error.message)
+    next(error.message);
   }
-})
+});
 
 export const statusUpdate = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
