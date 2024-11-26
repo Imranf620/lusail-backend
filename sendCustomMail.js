@@ -13,7 +13,7 @@ if (!SENDGRID_API_KEY) {
 sgMail.setApiKey(SENDGRID_API_KEY);
 
 const msg = {
-  to: 'aqibmalik1586@gmail.com',
+  to: 'shakeel7521951@gmail.com',
   from: 'aqibmalik1586@gmail.com',
   subject: 'greeting',
   text: 'welcome thank you for login and signup on our website',
@@ -23,7 +23,7 @@ const msg = {
 export const sendMail = async ({ to, subject, text }) => {
     const msg = {
       to,
-      from: 'your-verified-email@example.com', // Use your verified email
+      from: 'aqibmalik1586@gmail.com', // Use your verified email
       subject,
       text,
     };

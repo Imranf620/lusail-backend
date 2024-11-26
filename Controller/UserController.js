@@ -1,13 +1,11 @@
 import UserModel from '../Model/UserModel.js';
 import ErrorHandler from '../utils/ErrorHandler.js';
-import nodemailer from 'nodemailer';
 import { sendMail } from '../sendCustomMail.js';
 import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 
 export const Signup = catchAsyncError(async (req, res) => {
   const { name, email, password, role } = req.body;
 
-  // Create the user
   const user = await UserModel.create({
     name,
     email,
@@ -17,7 +15,6 @@ export const Signup = catchAsyncError(async (req, res) => {
 
   const token = user.getJWTToken();
 
-  // Send Welcome Email
   const subject = 'Welcome to Our Website!';
   const text = `Hi ${name},\n\nThank you for signing up on our website. We hope you have a great experience.\n\nBest regards,\nYour Company Team`;
 
@@ -172,19 +169,12 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-
-    const message = `Your OTP for password reset is: ${OTP}\n\nIf you did not request this, please ignore this email.`;
-
-    await transporter.sendMail({
-      from: process.env.SMTP_USER,
+    const message = `
+    <p>Your OTP for password reset is:</p>
+    <h2 style="font-size: 24px; font-weight: bold;">\n\n${OTP}\n\n</h2>
+    <p>If you did not request this, please ignore this email.</p>
+  `;
+    await sendMail({
       to: email,
       subject: 'Password Reset OTP',
       text: message,
@@ -195,7 +185,7 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
       message: `OTP sent to ${email} successfully`,
     });
   } catch (error) {
-    console.error('Email send error:', error); // Log the error
+    console.error('Email send error:', error);
     user.otp = undefined;
     user.otpExpires = undefined;
     await user.save({ validateBeforeSave: false });
@@ -205,7 +195,7 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
 });
 
 export const VerifyOTP = catchAsyncError(async (req, res, next) => {
-  const { otp, email } = req.body; // Include email to find user
+  const { otp, email } = req.body;
 
   if (!otp || !email) {
     return next(new ErrorHandler('Please provide email and OTP', 400));
@@ -220,7 +210,6 @@ export const VerifyOTP = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler('Invalid or expired OTP', 400));
   }
 
-  // OTP is valid, clear it from the user document
   user.otp = undefined;
   user.otpExpires = undefined;
   await user.save();
