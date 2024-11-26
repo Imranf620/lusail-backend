@@ -164,7 +164,6 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler('User not found with this email', 404));
   }
 
-  // Generate OTP and save it to the user document
   const OTP = user.generateOTP();
   await user.save({ validateBeforeSave: false });
 
