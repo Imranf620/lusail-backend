@@ -33,7 +33,7 @@ Router.put('/updateProfile', isUserLoggedIn, UpdateProfile);
 Router.put('/updatePassword', isUserLoggedIn, UpdatePassword);
 Router.post('/forgetPassword', ForgetPassword);
 Router.post('/verifyOTP', VerifyOTP);
-Router.put('/resetPassword/:token', ResetPassword);
+Router.put('/resetPassword', ResetPassword);
 Router.get(
   '/user/:id',
   isUserLoggedIn,

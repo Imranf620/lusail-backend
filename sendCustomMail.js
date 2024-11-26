@@ -25,7 +25,7 @@ export const sendMail = async ({ to, subject, text }) => {
       to,
       from: 'aqibmalik1586@gmail.com', // Use your verified email
       subject,
-      text,
+      html:text,
     };
   
     try {

@@ -14,13 +14,13 @@ export const Signup = catchAsyncError(async (req, res) => {
   });
 
   const token = user.getJWTToken();
+  const otp = user.generateOTP();
 
   const subject = 'Welcome to Our Website!';
-  const text = `Hi ${name},\n\nThank you for signing up on our website. We hope you have a great experience.\n\nBest regards,\nYour Company Team`;
+  const text = `Hello ${name},\n\nThank you for joining us at [Your Company Name]! We're excited to have you on board and look forward to providing you with a fantastic experience.\n\nTo complete your registration, please use the OTP below for verification:\n\n<h2 style="font-size: 36px; font-weight: bold; color: #4CAF50;">${otp}</h2>\n\nIf you need any assistance, feel free to reach out to us. We're here to help!\n\nBest regards,\nThe Lusail Numbers plate Team`;
 
   await sendMail({ to: email, subject, text });
 
-  // Respond to the client
   res
     .status(200)
     .cookie('token', token, {
@@ -169,10 +169,13 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
 
   try {
     const message = `
-    <p>Your OTP for password reset is:</p>
-    <h2 style="font-size: 24px; font-weight: bold;">\n\n${OTP}\n\n</h2>
-    <p>If you did not request this, please ignore this email.</p>
-  `;
+  <p>Hi there,</p>
+<p>We received a request to reset your password. Your One-Time Password (OTP) for this process is:</p>
+<h2 style="font-size: 36px; font-weight: bold; color: #4CAF50;">${OTP}</h2>
+<p>If you did not make this request, please ignore this email. Rest assured, your account is safe.</p>
+<p>If you need further assistance, feel free to reach out to us!</p>
+<p>Best regards,<br>Your Lusail Numbers plate Team</p>
+`
     await sendMail({
       to: email,
       subject: 'Password Reset OTP',
