@@ -28,6 +28,10 @@ const UserSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
   },
+  status: {
+    type: String,
+    default: 'unverified'
+  },
   otp: String,
   otpExpires: Date,
   createdDate: {

@@ -7,12 +7,14 @@ import {
   Login,
   Logout,
   MyProfile,
+  resendOTP,
   ResetPassword,
   Signup,
   UpdatePassword,
   UpdateProfile,
   UpdateUserProfile,
   VerifyOTP,
+  verifyUser,
 } from '../Controller/UserController.js';
 import { isUserLoggedIn, isAuthenticated } from '../utils/Auth.js';
 import express from 'express';
@@ -20,6 +22,8 @@ import express from 'express';
 const Router = express.Router();
 
 Router.post('/signup', Signup);
+Router.post('/verify-otp',verifyUser);
+Router.post('/resend-otp',resendOTP);
 Router.post('/login', Login);
 Router.get(
   '/users',

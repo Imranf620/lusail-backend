@@ -42,6 +42,64 @@ export const Signup = catchAsyncError(async (req, res) => {
     });
 });
 
+export const verifyUser = catchAsyncError(async (req, res, next) => {
+  const { otp, email } = req.body;
+
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    return next(new ErrorHandler('User with this email not found!', 404));
+  }
+
+  if (Date.now() > user.otpExpires) {
+    return res.status(400).json({
+      success: false,
+      message: "OTP has expired. Please request a new OTP.",
+      resendOTP: true, // Indicate the client should show the "resend OTP" option
+    });
+  }
+
+  // Verify OTP
+  if (user.otp === otp) {
+    user.otp = undefined;
+    user.otpExpires = undefined; // Clear the expiry field
+    user.status = 'verified';
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Welcome to Lusail Number plates.",
+    });
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: "Wrong OTP. Please try again.",
+    });
+  }
+});
+
+export const resendOTP = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    return next(new ErrorHandler('User with this email not found!', 404));
+  }
+
+  // Generate new OTP
+  const otp = user.generateOTP();
+  await user.save();
+
+  const subject = 'Resend OTP';
+  const text = `Hello ${user.name},\n\nHere is your new OTP for verification:\n\n<h2>${otp}</h2>\n\nThis OTP is valid for 5 minutes.\n\nBest regards,\nThe Lusail Numbers plate Team`;
+
+  await sendMail({ to: user.email, subject, text });
+
+  res.status(200).json({
+    success: true,
+    message: "A new OTP has been sent to your email.",
+  });
+});
+
 export const Login = async (req, res, next) => {
   const { email, password } = req.body;
 
