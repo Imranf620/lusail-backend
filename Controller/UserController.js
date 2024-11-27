@@ -2,15 +2,22 @@ import UserModel from '../Model/UserModel.js';
 import ErrorHandler from '../utils/ErrorHandler.js';
 import { sendMail } from '../sendCustomMail.js';
 import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
+import { v2 } from 'cloudinary';
 
 export const Signup = catchAsyncError(async (req, res) => {
   const { name, email, password, role } = req.body;
+  const file = req.files.image;
+
+  const result = await v2.uploader.upload(file.tempFilePath, {
+    folder: 'User Profiles',
+  });
 
   const user = await UserModel.create({
     name,
     email,
     password,
     role,
+    imageUrl: result.secure_url,
   });
 
   const token = user.getJWTToken();
@@ -187,7 +194,6 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
       message: `OTP sent to ${email} successfully`,
     });
   } catch (error) {
-    console.error('Email send error:', error);
     user.otp = undefined;
     user.otpExpires = undefined;
     await user.save({ validateBeforeSave: false });

@@ -2,12 +2,14 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import fileUpload from 'express-fileupload';
 
 import userRoute from './Route/UserRoute.js';
 import productRoute from './Route/ProductRoute.js';
 import orderRoute from './Route/OrderRoute.js';
 import ConnectDB from './ConnectDb/connectDB.js';
 import error from './Middleware/error.js';
+import { v2 } from 'cloudinary';
 
 process.on('uncaughtException', (err) => {
   console.error(`Uncaught exception: ${err.message}`);
@@ -17,7 +19,17 @@ process.on('uncaughtException', (err) => {
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
-app.use(express.json());
+v2.config({
+  cloud_name: process.env.Cloud_Name,
+  api_key: process.env.Cloud_API_Key,
+  api_secret: process.env.API_Secret_Key,
+});
+app.use(express.json({ limit: '50mb' }));
+app.use(
+  fileUpload({
+    useTempFiles: true,
+  })
+);
 
 app.use(
   cors({
