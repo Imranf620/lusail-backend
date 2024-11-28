@@ -1,5 +1,6 @@
 import UserModel from '../Model/UserModel.js';
 import ErrorHandler from '../utils/ErrorHandler.js';
+import ProductModel from '../Model/ProductModel.js';
 import { sendMail } from '../sendCustomMail.js';
 import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 import { v2 } from 'cloudinary';
@@ -344,9 +345,10 @@ export const DeleteOwnProfile = catchAsyncError(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler('User not found', 404));
   }
+
   res.status(200).json({
     success: true,
-    message: 'User deleted successfully',
+    message: 'User and associated products deleted successfully',
   });
 });
 
@@ -355,9 +357,10 @@ export const DeleteUserProfile = catchAsyncError(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler('User not found', 404));
   }
+
   res.status(200).json({
     success: true,
-    message: 'User deleted successfully',
+    message: 'User and associated products deleted successfully',
   });
 });
 

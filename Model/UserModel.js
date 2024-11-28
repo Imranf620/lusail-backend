@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: 'unverified'
+    default: 'unverified',
   },
   otp: String,
   otpExpires: Date,
@@ -65,4 +65,16 @@ UserSchema.methods.generateOTP = function () {
   return otp;
 };
 
+UserSchema.pre('findOneAndDelete', async function (next) {
+  try {
+    const user = await this.model.findOne(this.getFilter());
+    if (!user) return next();
+
+    await mongoose.model('Product').deleteMany({ seller: user._id });
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 export default mongoose.model('User', UserSchema);
