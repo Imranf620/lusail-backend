@@ -7,7 +7,7 @@ import {
   Login,
   Logout,
   MyProfile,
-  resendOTP,
+  resendOTP, // remove nesxt -----------------
   ResetPassword,
   Signup,
   UpdatePassword,
