@@ -4,13 +4,26 @@ import { sendMail } from '../sendCustomMail.js';
 import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 import { v2 } from 'cloudinary';
 
-export const Signup = catchAsyncError(async (req, res) => {
+export const Signup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role } = req.body;
   const file = req.files.image;
 
   const result = await v2.uploader.upload(file.tempFilePath, {
     folder: 'User Profiles',
   });
+
+  if (!email) {
+    return next(new ErrorHandler('invalid detail', 500));
+  }
+
+  const deletedUser = await UserModel.findOneAndDelete({
+    email: email,
+    status: 'unverified',
+  });
+
+  if (deletedUser) {
+    console.log('User successfully deleted:', deletedUser);
+  }
 
   const user = await UserModel.create({
     name,
@@ -116,6 +129,10 @@ export const Login = catchAsyncError(async (req, res, next) => {
       success: false,
       message: 'User not found',
     });
+  }
+
+  if (user.status === 'unverified') {
+    return next(new ErrorHandler('Not verified', 401));
   }
 
   const isPasswordMatch = await user.comparePassword(password);
