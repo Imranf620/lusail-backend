@@ -20,30 +20,28 @@ export const Signup = catchAsyncError(async (req, res) => {
     imageUrl: result.secure_url,
   });
 
-  const token = user.getJWTToken();
   const otp = user.generateOTP();
+
+  await user.save();
 
   const subject = 'Welcome to Our Website!';
   const text = `Hello ${name},\n\nThank you for joining us at [Your Company Name]! We're excited to have you on board and look forward to providing you with a fantastic experience.\n\nTo complete your registration, please use the OTP below for verification:\n\n<h2 style="font-size: 36px; font-weight: bold; color: #4CAF50;">${otp}</h2>\n\nIf you need any assistance, feel free to reach out to us. We're here to help!\n\nBest regards,\nThe Lusail Numbers plate Team`;
 
   await sendMail({ to: email, subject, text });
 
-  res
-    .status(200)
-    .cookie('token', token, {
-      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-    })
-    .json({
-      success: true,
-      message: 'User registered successfully',
-      user,
-      token,
-    });
+  res.status(200).json({
+    success: true,
+    message: 'User registered successfully',
+    user,
+  });
 });
 
 export const verifyUser = catchAsyncError(async (req, res, next) => {
   const { otp, email } = req.body;
+
+  if (!otp) {
+    return next(new ErrorHandler('Please enter your otp', 400));
+  }
 
   const user = await UserModel.findOne({ email });
   if (!user) {
@@ -53,10 +51,12 @@ export const verifyUser = catchAsyncError(async (req, res, next) => {
   if (Date.now() > user.otpExpires) {
     return res.status(400).json({
       success: false,
-      message: "OTP has expired. Please request a new OTP.",
+      message: 'OTP has expired. Please request a new OTP.',
       resendOTP: true, // Indicate the client should show the "resend OTP" option
     });
   }
+
+  const token = user.getJWTToken();
 
   // Verify OTP
   if (user.otp === otp) {
@@ -65,14 +65,21 @@ export const verifyUser = catchAsyncError(async (req, res, next) => {
     user.status = 'verified';
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Welcome to Lusail Number plates.",
-    });
+    res
+      .status(200)
+      .cookie('token', token, {
+        expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+        httpOnly: true,
+      })
+      .json({
+        success: true,
+        message: 'Welcome to Lusail Number plates.',
+        token,
+      });
   } else {
     return res.status(400).json({
       success: false,
-      message: "Wrong OTP. Please try again.",
+      message: 'Wrong OTP. Please try again.',
     });
   }
 });
@@ -96,7 +103,7 @@ export const resendOTP = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "A new OTP has been sent to your email.",
+    message: 'A new OTP has been sent to your email.',
   });
 });
 
