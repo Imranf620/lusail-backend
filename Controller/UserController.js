@@ -107,7 +107,7 @@ export const resendOTP = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const Login = async (req, res, next) => {
+export const Login = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
 
   const user = await UserModel.findOne({ email }).select('+password');
@@ -135,7 +135,7 @@ export const Login = async (req, res, next) => {
       message: 'User logged in successfully',
       user,
     });
-};
+});
 
 export const GetallUsers = catchAsyncError(async (req, res, next) => {
   const users = await UserModel.find();
