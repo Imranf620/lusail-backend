@@ -132,7 +132,7 @@ export const Login = catchAsyncError(async (req, res, next) => {
   }
 
   if (user.status === 'unverified') {
-    return next(new ErrorHandler('Not verified', 401));
+    return next(new ErrorHandler('User not found please Signup again!', 401));
   }
 
   const isPasswordMatch = await user.comparePassword(password);
