@@ -25,7 +25,6 @@ Router.delete(
 Router.get(
   '/getAllOrders',
   isUserLoggedIn,
-  isAuthenticated('admin'),
   getAllOrders
 );
 
