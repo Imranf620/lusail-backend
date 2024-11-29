@@ -76,7 +76,7 @@ export const userOrders = catchAsyncError(async (req, res, next) => {
       products,
     });
   } catch (error) {
-    next(new Error(error.message)); // Pass a proper error object to `next`
+    next(new Error(error.message));
   }
 });
 
@@ -107,7 +107,7 @@ export const deleteOrder = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
   const deleteOrder = await OrderModel.findByIdAndDelete(id);
   if (!deleteOrder) {
-    return next(new ErrorHandler('Order not found!', 404));
+    res.status(200).json({message:"Order not found!",success:true})
   }
   res
     .status(200)
