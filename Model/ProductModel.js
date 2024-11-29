@@ -78,16 +78,20 @@ productSchema.pre('findOneAndUpdate', function (next) {
 
 productSchema.pre('findOneAndDelete', async function (next) {
   try {
-    const product = await this.model.findOne(this.getFilter());
-    if (!product) return next();
+    const query = this.getQuery(); // Correctly get the query object
+    const product = await this.model.findOne(query);
+    if (!product) return next(); // If no product found, skip further processing.
 
+    // Delete all orders related to the product
     await mongoose.model('Order').deleteMany({ product: product._id });
 
     next();
   } catch (error) {
-    next(error);
+    next(error); // Pass error to the next middleware
   }
 });
+
+
 
 
 export default mongoose.model('Product', productSchema);
