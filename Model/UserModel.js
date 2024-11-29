@@ -71,6 +71,7 @@ UserSchema.pre('findOneAndDelete', async function (next) {
     if (!user) return next();
 
     await mongoose.model('Product').deleteMany({ seller: user._id });
+    await mongoose.model('Order').deleteMany({ seller: user._id });
 
     next();
   } catch (error) {
