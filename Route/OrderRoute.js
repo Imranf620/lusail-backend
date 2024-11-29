@@ -20,7 +20,6 @@ Router.put(
 Router.delete(
   '/deleteOrder/:id',
   isUserLoggedIn,
-  isAuthenticated('admin'),
   deleteOrder
 );
 Router.get(
