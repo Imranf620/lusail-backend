@@ -81,12 +81,13 @@ productSchema.pre('findOneAndDelete', async function (next) {
     const product = await this.model.findOne(this.getFilter());
     if (!product) return next();
 
-    await mongoose.model('Order').deleteMany({ seller: product._id });
+    await mongoose.model('Order').deleteMany({ product: product._id });
 
     next();
   } catch (error) {
     next(error);
   }
 });
+
 
 export default mongoose.model('Product', productSchema);
