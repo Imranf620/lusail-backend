@@ -29,6 +29,6 @@ Router.get(
   getAllOrders
 );
 
-Router.get('/user-orders',isUserLoggedIn,isAuthenticated(['admin', 'seller']),userOrders)
+Router.get('/user-orders',isUserLoggedIn,userOrders)
 
 export default Router;

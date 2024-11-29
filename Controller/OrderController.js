@@ -63,10 +63,7 @@ export const userOrders = catchAsyncError(async (req, res, next) => {
     });
 
     if (!products || products.length === 0) {
-      return res.status(404).json({
-        message: 'Orders not found!',
-        success: false,
-      });
+      return res.status(200).json({message:"Orders not found!",success:true,products:[]})
     }
 
     res.status(200).json({
