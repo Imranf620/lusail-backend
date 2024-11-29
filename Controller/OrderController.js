@@ -95,7 +95,7 @@ export const statusUpdate = catchAsyncError(async (req, res, next) => {
 export const getAllOrders = catchAsyncError(async (req, res, next) => {
   const findOrders = await OrderModel.find();
   if (findOrders.length < 1) {
-    res.status(200).json({message:"No order found!",success:true})
+    res.status(200).json({message:"No order found!",success:true,findOrders:[]})
   }
   res.status(200).json({ success: true, count: findOrders.length, findOrders });
 });
