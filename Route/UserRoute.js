@@ -1,4 +1,7 @@
 import {
+  appLogin,
+  appSignup,
+  appVerifyUser,
   DeleteOwnProfile,
   DeleteUserProfile,
   ForgetPassword,
@@ -21,9 +24,13 @@ import express from 'express';
 
 const Router = express.Router();
 
+Router.post('app/signup', appSignup);
+Router.post('app/verify-otp', appVerifyUser);
+Router.post('app/login', appLogin);
+
 Router.post('/signup', Signup);
-Router.post('/verify-otp',verifyUser);
-Router.post('/resend-otp',resendOTP);
+Router.post('/verify-otp', verifyUser);
+Router.post('/resend-otp', resendOTP);
 Router.post('/login', Login);
 Router.get(
   '/users',
