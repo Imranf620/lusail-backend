@@ -5,7 +5,7 @@ import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 import { v2 } from 'cloudinary';
 
 export const appSignup = catchAsyncError(async (req, res, next) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role,phone } = req.body;
   const file = req.files.image;
 
   const result = await v2.uploader.upload(file.tempFilePath, {
@@ -30,6 +30,7 @@ export const appSignup = catchAsyncError(async (req, res, next) => {
     email,
     password,
     role,
+    phone,
     imageUrl: result.secure_url,
   });
 
