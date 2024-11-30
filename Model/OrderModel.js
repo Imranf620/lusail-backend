@@ -44,9 +44,10 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  product: { 
+  product: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
+    ref: 'Product',
+    required: true,
   },
 });
 
