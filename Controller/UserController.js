@@ -1,6 +1,5 @@
 import UserModel from '../Model/UserModel.js';
 import ErrorHandler from '../utils/ErrorHandler.js';
-import ProductModel from '../Model/ProductModel.js';
 import { sendMail } from '../sendCustomMail.js';
 import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 import { v2 } from 'cloudinary';
