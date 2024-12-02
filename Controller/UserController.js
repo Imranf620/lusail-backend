@@ -5,7 +5,7 @@ import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
 import { v2 } from 'cloudinary';
 
 export const appSignup = catchAsyncError(async (req, res, next) => {
-  const { name, email, password, role,phone } = req.body;
+  const { name, email, password, role, phone } = req.body;
   const file = req.files.image;
 
   const result = await v2.uploader.upload(file.tempFilePath, {
@@ -62,7 +62,7 @@ export const appVerifyUser = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler('User with this email not found!', 404));
   }
 
-  if (Date.now() > user.otpExpires) {
+  if (new Date() > user.otpExpires) {
     return res.status(400).json({
       success: false,
       message: 'OTP has expired. Please request a new OTP.',
@@ -71,13 +71,15 @@ export const appVerifyUser = catchAsyncError(async (req, res, next) => {
   }
 
   if (user.otp === otp) {
-    const token = user.getJWTToken();
-    const expiresIn = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-
     user.otp = undefined;
     user.otpExpires = undefined;
     user.status = 'verified';
     await user.save();
+
+    const token = user.getJWTToken();
+    const expiresIn = new Date(
+      Date.now() + 15 * 24 * 60 * 60 * 1000
+    ).toISOString();
 
     return res.status(200).json({
       success: true,

@@ -24,9 +24,9 @@ import express from 'express';
 
 const Router = express.Router();
 
-Router.post('app/signup', appSignup);
-Router.post('app/verify-otp', appVerifyUser);
-Router.post('app/login', appLogin);
+Router.post('/app/signup', appSignup);
+Router.post('/app/verifyOTP', appVerifyUser);
+Router.post('/app/login', appLogin);
 
 Router.post('/signup', Signup);
 Router.post('/verify-otp', verifyUser);
