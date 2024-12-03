@@ -32,12 +32,7 @@ Router.post('/signup', Signup);
 Router.post('/verify-otp', verifyUser);
 Router.post('/resend-otp', resendOTP);
 Router.post('/login', Login);
-Router.get(
-  '/users',
-  isUserLoggedIn,
-  isAuthenticated(['admin', 'seller']),
-  GetallUsers
-);
+Router.get('/users', isUserLoggedIn, isAuthenticated('admin'), GetallUsers);
 Router.get('/profile', isUserLoggedIn, MyProfile);
 Router.get('/logout', isUserLoggedIn, Logout);
 Router.put('/updateProfile', isUserLoggedIn, UpdateProfile);
