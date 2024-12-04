@@ -58,18 +58,3 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
   });
 });
-
-// .env file DATA
-
-// PORT = 5000
-
-// Mongo_URL = mongodb+srv://thinkcodes57:mcV9eCK9QCDuQjwW@cluster0.dv2hu.mongodb.net/Lusail?retryWrites=true&w=majority&appName=Cluster0
-
-// JWT_SECRET = yttrugshfqwjhg65454egqgcef1y23tut
-// JWT_EXPIRE = 15d
-
-// SMTP_HOST=smtp.gmail.com
-// SMTP_PORT=587
-// SMTP_USER=aqibmalik1586@gmail.com
-// SMTP_PASS=qspmzybddnzdkjzr
-// SMTP_SERVICE=gmail
