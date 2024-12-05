@@ -21,8 +21,8 @@ const UserSchema = new mongoose.Schema({
     minlength: [8, 'Password must be at least 8 charaaters'],
     select: false,
   },
-  phone:{
-    type:Number,
+  phone: {
+    type: Number,
   },
   role: {
     type: String,
@@ -41,17 +41,16 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  token: String,
 });
 
 UserSchema.pre('save', async function () {
   if (this.isModified('password')) {
-    //Hash the password before saving it to the database
     this.password = await bcryptjs.hash(this.password, 10);
   }
 });
 
 UserSchema.methods.comparePassword = async function (password) {
-  //Compare the hashed password with the candidate password
   return await bcryptjs.compare(password, this.password);
 };
 

@@ -115,15 +115,22 @@ export const appLogin = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler('Password mismatch', 400));
   }
   const token = user.getJWTToken();
-  const expiresIn = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
 
-  res.status(200).json({
-    success: true,
-    message: 'User logged in successfully',
-    user,
-    token,
-    expiresIn,
-  });
+  user.token = token;
+  await user.save();
+
+  res
+    .status(200)
+    .cookie('token', token, {
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days
+      httpOnly: true,
+    })
+    .json({
+      success: true,
+      message: 'User logged in successfully',
+      user,
+      token,
+    });
 });
 
 export const Signup = catchAsyncError(async (req, res, next) => {
@@ -286,10 +293,14 @@ export const GetallUsers = catchAsyncError(async (req, res, next) => {
 });
 
 export const Logout = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findById(req.user._id);
   res.cookie('token', null, {
     httpOnly: true,
     expires: new Date(Date.now()),
   });
+
+  user.token = undefined;
+  await user.save();
 
   res.status(200).json({
     success: true,
