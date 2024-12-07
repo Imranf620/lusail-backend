@@ -4,7 +4,12 @@ import jwt from 'jsonwebtoken';
 
 export const isUserLoggedIn = async (req, res, next) => {
   const { token } = req.cookies;
-  const appToken = req.body.token;
+  const authorizationHeader = req.headers['authorization'];
+  let appToken;
+
+  if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+    appToken = authorizationHeader.split(' ')[1];
+  }
 
   if (!token && !appToken) {
     return next(new ErrorHandler('Please login to access this page', 401));
