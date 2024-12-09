@@ -31,6 +31,8 @@ const io = new Server(server, {
   },
 });
 
+app.set('io', io); // Set io instance to app
+
 const PORT = process.env.PORT || 5000;
 
 v2.config({
@@ -53,7 +55,7 @@ app.use(
 app.use('/api/v1', userRoute);
 app.use('/api/v1', productRoute);
 app.use('/api/v1', orderRoute);
-app.use('/api/v1', messageRoute); // Using external route for message handling
+app.use('/api/v1', messageRoute); // Use message route
 
 app.use(error);
 
@@ -69,20 +71,21 @@ io.on('connection', (socket) => {
     console.log(`${userId} joined the chat.`);
   });
 
-  // Handle sending a new message (can also be done through the API, but using Socket.IO here)
+  // Handle sending a new message
   socket.on('sendMessage', async (message) => {
     try {
-      // Save the message in the database
-      const newMessage = new Message({
+      const newMessage = await Message.create({
         sender: message.senderId,
         receiver: message.receiverId,
         content: message.content,
       });
 
-      await newMessage.save();
+      // Find the receiver's socketId
+      const receiver = users.find((user) => user.userId === message.receiverId);
 
-      // Broadcast the message to the receiver
-      io.emit('receiveMessage', message); // You can modify this to send to specific users if needed
+      if (receiver) {
+        socket.to(receiver.socketId).emit('receiveMessage', newMessage);
+      }
     } catch (error) {
       console.error('Error saving message:', error);
     }
@@ -107,3 +110,5 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
   });
 });
+
+export { io }; // Export io to use in routes
