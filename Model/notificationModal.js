@@ -5,10 +5,9 @@ const { Schema, model } = mongoose;
 // Notification Schema
 const NotificationSchema = new Schema(
   {
-    userId: {
+    buyerId: {
       type: String, // Reference to a user
       required: true,
-      ref: 'User', // Refers to the User model (adjust if the model is named differently)
     },
     status: {
       type: String,
@@ -16,8 +15,8 @@ const NotificationSchema = new Schema(
       default: 'unseen', // Default value
       required: true,
     },
-    message: {
-      type: Object, // Store the message as an object
+    sellerId: {
+      type: String, // Reference to a user
       required: true,
     },
   },

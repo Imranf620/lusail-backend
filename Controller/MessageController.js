@@ -4,25 +4,28 @@ import ErrorHandler from '../utils/ErrorHandler.js';
 import Message from './../Model/MessageModal.js';
 
 export const sendMessage = async (req, res, io) => {
-  const { senderId, receiverId, content } = req.body;
+  const userId = req.user._id;
+  const userRole = req.user.role;
+  if (!userId && !userRole) {
+    return res.status(400).json({ message: 'User ID is required.' });
+  }
+  const { receiverId, content } = req.body;
   console.log(req.body);
 
-  if (senderId !== receiverId) {
+  if (userRole === 'buyer') {
     console.log('Buyer is messaging');
 
     // Initialize chat
-    const chat = new Chat({
-      sellerID: senderId,
-      buyerID: receiverId,
-    });
+    // const chat = new Chat({
+    //   sellerID: senderId,
+    //   buyerID: userId,
+    // });
 
-    await chat.save();
+    // await chat.save();
 
     const notificationChat = new Notification({
-      userId: receiverId,
-      message: {
-        buyerId: senderId,
-      },
+      sellerId: receiverId,
+      buyerId: userId,
     });
 
     await notificationChat.save();
@@ -31,9 +34,15 @@ export const sendMessage = async (req, res, io) => {
     io.emit('notification', notificationChat); // Broadcast notification to all connected clients
     console.log('Notification emitted:', notificationChat);
 
-    console.log('Chat initialized:', chat);
-  } else {
+    // console.log('Chat initialized:', chat);
+  } else if (userRole === 'seller') {
     console.log('Seller is messaging');
+    const notificationChat = new Notification({
+      sellerId: userId,
+      buyerId: receiverId,
+    });
+
+    await notificationChat.save();
   }
 
   try {
@@ -82,21 +91,19 @@ export const getNotifications = async (req, res) => {
   try {
     // Assuming `req.user._id` contains the logged-in user's ID
     const userID = req.user._id;
-
-    if (!userID) {
+    const userRole = req.user.role;
+    console.log(userID);
+    if (!userID && !userRole) {
       return res.status(400).json({ message: 'User ID is required.' });
     }
+    let notifications;
+    if (userRole === 'seller') {
+      notifications = await Notification.find({ sellerId: userID });
+    } else if (userRole === 'buyer') {
+      notifications = await Notification.find({ buyerId: userID });
+    }
 
-    // Find all unseen notifications for the given userID
-    const notifications = await Notification.find({
-      $or: [
-        { userId: userID }, // Direct match
-        { 'nestedField.userId': userID }, // If it's inside a nested object (example)
-        { arrayField: userID }, // If it's inside an array
-      ],
-      status: 'unseen', // Match only unseen notifications
-    });
-
+    console.log(notifications);
     // If no notifications found
     if (!notifications || notifications.length === 0) {
       return res
