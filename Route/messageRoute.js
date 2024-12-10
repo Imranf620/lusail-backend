@@ -11,7 +11,7 @@ import { isUserLoggedIn } from '../utils/Auth.js';
 const Router = express.Router();
 
 // Route for sending a message
-Router.post('/sendmessage', (req, res) =>
+Router.post('/sendmessage', isUserLoggedIn, (req, res) =>
   sendMessage(req, res, req.app.get('io'))
 ); // Pass io to sendMessage
 
