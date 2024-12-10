@@ -69,12 +69,7 @@ export const getMessages = async (req, res) => {
         { sender: senderId, receiver: receiverId },
         { sender: receiverId, receiver: senderId },
       ],
-    }).sort({ timestamp: 1 }); // Sort messages chronologically
-
-    // Log messages for debugging (optional)
-    // console.log('Fetched messages:', messages);
-
-    // Respond with the messages
+    }).sort({ timestamp: 1 });
     res.status(200).json(messages);
   } catch (error) {
     res
@@ -94,7 +89,11 @@ export const getNotifications = async (req, res) => {
 
     // Find all unseen notifications for the given userID
     const notifications = await Notification.find({
-      userId: userID, // Match the userId
+      $or: [
+        { userId: userID }, // Direct match
+        { 'nestedField.userId': userID }, // If it's inside a nested object (example)
+        { arrayField: userID }, // If it's inside an array
+      ],
       status: 'unseen', // Match only unseen notifications
     });
 
