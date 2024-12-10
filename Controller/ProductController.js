@@ -70,9 +70,8 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
 
 export const getProductsOfSeller = catchAsyncError(async (req, res, next) => {
   try {
-    const sellerId = req.user._id; // Assuming `req.user._id` is available
+    const sellerId = req.user._id;
 
-    // Query with the correct field name
     const products = await ProductSchema.find({ seller: sellerId });
 
     if (!products.length) {

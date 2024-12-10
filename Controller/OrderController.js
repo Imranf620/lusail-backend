@@ -57,13 +57,14 @@ export const userOrders = catchAsyncError(async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    // Find products where the user is either the buyer or seller
     const products = await OrderModel.find({
       $or: [{ seller: userId }, { buyer: userId }],
     });
 
     if (!products || products.length === 0) {
-      return res.status(200).json({message:"Orders not found!",success:true,products:[]})
+      return res
+        .status(200)
+        .json({ message: 'Orders not found!', success: true, products: [] });
     }
 
     res.status(200).json({
@@ -95,7 +96,9 @@ export const statusUpdate = catchAsyncError(async (req, res, next) => {
 export const getAllOrders = catchAsyncError(async (req, res, next) => {
   const findOrders = await OrderModel.find();
   if (findOrders.length < 1) {
-    res.status(200).json({message:"No order found!",success:true,findOrders:[]})
+    res
+      .status(200)
+      .json({ message: 'No order found!', success: true, findOrders: [] });
   }
   res.status(200).json({ success: true, count: findOrders.length, findOrders });
 });
@@ -104,7 +107,7 @@ export const deleteOrder = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
   const deleteOrder = await OrderModel.findByIdAndDelete(id);
   if (!deleteOrder) {
-    res.status(200).json({message:"Order not found!",success:true})
+    res.status(200).json({ message: 'Order not found!', success: true });
   }
   res
     .status(200)

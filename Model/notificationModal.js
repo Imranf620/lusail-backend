@@ -2,26 +2,25 @@ import mongoose from 'mongoose';
 
 const { Schema, model } = mongoose;
 
-// Notification Schema
 const NotificationSchema = new Schema(
   {
     buyerId: {
-      type: String, // Reference to a user
+      type: String,
       required: true,
     },
     status: {
       type: String,
-      enum: ['seen', 'unseen'], // Restrict values to 'seen' or 'unseen'
-      default: 'unseen', // Default value
+      enum: ['seen', 'unseen'],
+      default: 'unseen',
       required: true,
     },
     sellerId: {
-      type: String, // Reference to a user
+      type: String,
       required: true,
     },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt timestamps
+    timestamps: true,
   }
 );
 
