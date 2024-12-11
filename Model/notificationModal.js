@@ -18,6 +18,18 @@ const NotificationSchema = new Schema(
       type: String,
       required: true,
     },
+    senderName: {
+      type: String,
+      required: true,
+    },
+    senderImage: {
+      type: String,
+      required: true,
+    },
+    message: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

@@ -4,6 +4,8 @@ export const sendMessage = async (req, res, io) => {
   try {
     const userId = req.user._id;
     const userRole = req.user.role;
+    const userImage= req.user.imageUrl;
+    const userName= req.user.name;
     if (!userId || !userRole) {
       return res
         .status(400)
@@ -24,6 +26,9 @@ export const sendMessage = async (req, res, io) => {
       const notificationChat = new Notification({
         sellerId: receiverId,
         buyerId: userId,
+        senderName: userName,
+        senderImage: userImage,
+        message: content,
       });
       console.log(notificationChat);
       await notificationChat.save();
@@ -33,8 +38,11 @@ export const sendMessage = async (req, res, io) => {
       console.log('Seller is messaging');
 
       const notificationChat = new Notification({
-        sellerId: userId,
-        buyerId: receiverId,
+        sellerId: receiverId,
+        buyerId: userId,
+        senderName: userName,
+        senderImage: userImage,
+        message: content,
       });
       console.log(notificationChat);
       await notificationChat.save();
