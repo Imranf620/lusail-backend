@@ -38,8 +38,8 @@ export const sendMessage = async (req, res, io) => {
       console.log('Seller is messaging');
 
       const notificationChat = new Notification({
-        sellerId: receiverId,
-        buyerId: userId,
+        sellerId: userId,
+        buyerId: receiverId,
         senderName: userName,
         senderImage: userImage,
         message: content,
@@ -103,7 +103,9 @@ export const getNotifications = async (req, res) => {
     if (userRole === 'seller') {
       notifications = await Notification.find({ sellerId: userID });
     } else if (userRole === 'buyer') {
+      console.log("buyer is asking notifications")
       notifications = await Notification.find({ buyerId: userID });
+      console.log(notifications);
     }
 
     if (!notifications || notifications.length === 0) {
