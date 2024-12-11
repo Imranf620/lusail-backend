@@ -33,7 +33,7 @@ export const sendMessage = async (req, res, io) => {
       console.log(notificationChat);
       await notificationChat.save();
 
-      io.to(receiverId).emit('notification', notificationChat);
+      io.emit('notification', notificationChat);
     } else if (userRole === 'seller') {
       console.log('Seller is messaging');
 
@@ -47,7 +47,7 @@ export const sendMessage = async (req, res, io) => {
       console.log(notificationChat);
       await notificationChat.save();
 
-      io.to(receiverId).emit('notification', notificationChat);
+      io.emit('notification', notificationChat);
     }
 
     const newMessage = new Message({
