@@ -4,12 +4,11 @@ export const sendMessage = async (req, res, io) => {
   try {
     const userId = req.user._id;
     const userRole = req.user.role;
-    const userImage= req.user.imageUrl;
-    const userName= req.user.name;
+    const userImage = req.user.imageUrl;
+    const userName = req.user.name;
+
     if (!userId || !userRole) {
-      return res
-        .status(400)
-        .json({ message: 'User ID and role are required.' });
+      return res.status(400).json({ message: 'User ID and role are required.' });
     }
 
     const { receiverId, content } = req.body;
@@ -20,16 +19,19 @@ export const sendMessage = async (req, res, io) => {
         .json({ message: 'Receiver ID and content are required.' });
     }
 
+    let notificationChat;
+
     if (userRole === 'buyer') {
       console.log('Buyer is messaging');
 
-      const notificationChat = new Notification({
+      notificationChat = new Notification({
         sellerId: receiverId,
         buyerId: userId,
         senderName: userName,
         senderImage: userImage,
         message: content,
       });
+
       console.log(notificationChat);
       await notificationChat.save();
 
@@ -37,13 +39,14 @@ export const sendMessage = async (req, res, io) => {
     } else if (userRole === 'seller') {
       console.log('Seller is messaging');
 
-      const notificationChat = new Notification({
+      notificationChat = new Notification({
         sellerId: userId,
         buyerId: receiverId,
         senderName: userName,
         senderImage: userImage,
         message: content,
       });
+
       console.log(notificationChat);
       await notificationChat.save();
 
@@ -58,14 +61,17 @@ export const sendMessage = async (req, res, io) => {
     });
 
     await newMessage.save();
+
+    // Emit the new message document with `onMessage`
+    io.emit('onMessage', newMessage);
+
     res.status(201).json(newMessage);
   } catch (error) {
     console.error('Error sending message:', error);
-    res
-      .status(500)
-      .json({ message: 'Error sending message', error: error.message });
+    res.status(500).json({ message: 'Error sending message', error: error.message });
   }
 };
+
 
 export const getMessages = async (req, res) => {
   const userId = req.user._id;
