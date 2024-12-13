@@ -22,6 +22,10 @@ const NotificationSchema = new Schema(
       type: String,
       required: true,
     },
+    senderEmail: {
+      type: String,
+      required: true,
+    },
     senderImage: {
       type: String,
       required: true,

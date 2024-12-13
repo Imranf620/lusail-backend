@@ -9,6 +9,7 @@ export const sendMessage = async (req, res, io) => {
     const userRole = req.user.role;
     const userImage = req.user.imageUrl;
     const userName = req.user.name;
+    const userEmail = req.user.email;
 
     if (!userId || !userRole) {
       return res
@@ -31,10 +32,23 @@ export const sendMessage = async (req, res, io) => {
         { seller: userId, buyer: receiverId },
       ],
     });
+
     if (userRole === "buyer") {
       console.log("Buyer is messaging");
-      if (!isChatAlready) {
-        const chatCreated = await new Chat({
+      if (isChatAlready) {
+        // Update the existing chat
+        await Chat.updateOne(
+          { _id: isChatAlready._id },
+          {
+            $set: {
+              lastMessage: content,
+              lastMessageBy: "buyer",
+            },
+          }
+        );
+      } else {
+        // Create a new chat
+        const chatCreated = new Chat({
           seller: receiverId,
           buyer: userId,
           lastMessage: content,
@@ -43,12 +57,14 @@ export const sendMessage = async (req, res, io) => {
         await chatCreated.save();
         console.log(chatCreated);
       }
+
       notificationChat = new Notification({
         sellerId: receiverId,
         buyerId: userId,
         senderName: userName,
         senderImage: userImage,
         message: content,
+        senderEmail: userEmail,
       });
 
       console.log(notificationChat);
@@ -57,22 +73,36 @@ export const sendMessage = async (req, res, io) => {
       io.emit("notification", notificationChat);
     } else if (userRole === "seller") {
       console.log("Seller is messaging");
-      if (!isChatAlready) {
-        const chatCreated = await new Chat({
+      if (isChatAlready) {
+        // Update the existing chat
+        await Chat.updateOne(
+          { _id: isChatAlready._id },
+          {
+            $set: {
+              lastMessage: content,
+              lastMessageBy: "seller",
+            },
+          }
+        );
+      } else {
+        // Create a new chat
+        const chatCreated = new Chat({
           seller: userId,
           buyer: receiverId,
           lastMessage: content,
-          lastMessageBy: "buyer",
+          lastMessageBy: "seller",
         });
         await chatCreated.save();
         console.log(chatCreated);
       }
+
       notificationChat = new Notification({
         sellerId: userId,
         buyerId: receiverId,
         senderName: userName,
         senderImage: userImage,
         message: content,
+        senderEmail: userEmail,
       });
 
       console.log(notificationChat);
