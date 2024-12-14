@@ -6,10 +6,11 @@ import { v2 } from 'cloudinary';
 
 export const appSignup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role, phone } = req.body;
-  const file = req.files.image;
+  const file = req.files?.image;
 
-  const result = await v2.uploader.upload(file.tempFilePath, {
+  const result = await v2.uploader.upload(file.data, {
     folder: 'User Profiles',
+    resource_type: 'auto',
   });
 
   if (!email) {
@@ -135,10 +136,11 @@ export const appLogin = catchAsyncError(async (req, res, next) => {
 
 export const Signup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role } = req.body;
-  const file = req.files.image;
+  const file = req.files?.image;
 
-  const result = await v2.uploader.upload(file.tempFilePath, {
+  const result = await v2.uploader.upload(file.data, {
     folder: 'User Profiles',
+    resource_type: 'auto',
   });
 
   if (!email) {
