@@ -10,7 +10,7 @@ import { Server } from 'socket.io';
 import userRoute from './Route/UserRoute.js';
 import productRoute from './Route/ProductRoute.js';
 import orderRoute from './Route/OrderRoute.js';
-import messageRoute from './Route/messageRoute.js'; // External route for messages
+import messageRoute from './Route/messageRoute.js'; 
 import ConnectDB from './ConnectDb/connectDB.js';
 import error from './Middleware/error.js';
 import { v2 } from 'cloudinary';
@@ -25,7 +25,6 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// i have added method and allowedHeader in this io cors
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONT_END_URL,
@@ -67,7 +66,6 @@ app.use('/api/v1', messageRoute);
 
 app.use(error);
 
-// Socket.IO setup for handling real-time messages
 let users = [];
 
 io.on('connection', (socket) => {
