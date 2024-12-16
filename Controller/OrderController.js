@@ -19,13 +19,19 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const productWithSeller = await ProductModel.findById(id).populate("seller", "name email");
 =======
+=======
+>>>>>>> parent of f0bee90 (send confirmation message to seller, buyer , admin via email)
   const productWithSeller = await ProductModel.findById(id).populate(
     'seller',
     'name'
   );
+<<<<<<< HEAD
 >>>>>>> parent of 09a7b4d (update)
+=======
+>>>>>>> parent of f0bee90 (send confirmation message to seller, buyer , admin via email)
   const seller = productWithSeller.seller;
 
   if (!seller) {
