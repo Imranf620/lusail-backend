@@ -8,6 +8,7 @@ export const appSignup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role, phone } = req.body;
   const file = req.files?.image;
 
+<<<<<<< HEAD
   const fileBase64 = `data:${file.mimetype};base64,${file.data.toString(
     "base64"
   )}`;
@@ -15,6 +16,11 @@ export const appSignup = catchAsyncError(async (req, res, next) => {
   const result = await v2.uploader.upload(fileBase64, {
     folder: "User Profiles",
     resource_type: "auto",
+=======
+  const result = await v2.uploader.upload(file.data, {
+    folder: 'User Profiles',
+    resource_type: 'auto',
+>>>>>>> parent of 09a7b4d (update)
   });
 
   if (!email) {
@@ -142,6 +148,7 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role } = req.body;
   const file = req.files?.image;
 
+<<<<<<< HEAD
   const fileBase64 = `data:${file.mimetype};base64,${file.data.toString(
     "base64"
   )}`;
@@ -149,6 +156,11 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   const result = await v2.uploader.upload(fileBase64, {
     folder: "User Profiles",
     resource_type: "auto",
+=======
+  const result = await v2.uploader.upload(file.data, {
+    folder: 'User Profiles',
+    resource_type: 'auto',
+>>>>>>> parent of 09a7b4d (update)
   });
 
   if (!email) {

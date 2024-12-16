@@ -10,7 +10,7 @@ import { Server } from 'socket.io';
 import userRoute from './Route/UserRoute.js';
 import productRoute from './Route/ProductRoute.js';
 import orderRoute from './Route/OrderRoute.js';
-import messageRoute from './Route/messageRoute.js'; 
+import messageRoute from './Route/messageRoute.js';
 import ConnectDB from './ConnectDb/connectDB.js';
 import error from './Middleware/error.js';
 import { v2 } from 'cloudinary';
@@ -51,6 +51,7 @@ v2.config({
 app.use(express.json({ limit: '50mb' }));
 app.use(
   fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
     useTempFiles: false,
   })
 );
