@@ -33,6 +33,7 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
     buyer,
     plateNO: findProduct._id,
     price: findProduct.price,
+    product: findProduct._id,
     discountedPrice: findProduct.discountedPrice,
   });
 

@@ -10,7 +10,7 @@ import { Server } from 'socket.io';
 import userRoute from './Route/UserRoute.js';
 import productRoute from './Route/ProductRoute.js';
 import orderRoute from './Route/OrderRoute.js';
-import messageRoute from './Route/messageRoute.js'; // External route for messages
+import messageRoute from './Route/messageRoute.js'; 
 import ConnectDB from './ConnectDb/connectDB.js';
 import error from './Middleware/error.js';
 import { v2 } from 'cloudinary';
@@ -31,10 +31,13 @@ const io = new Server(server, {
     origin: process.env.FRONT_END_URL,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
     credentials: true,
   },
 });
 
+app.set('io', io);
 app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
@@ -46,6 +49,11 @@ v2.config({
 });
 
 app.use(express.json({ limit: '50mb' }));
+app.use(
+  fileUpload({
+    useTempFiles: false,
+  })
+);
 app.use(
   fileUpload({
     useTempFiles: false,
@@ -64,10 +72,10 @@ app.use('/api/v1', userRoute);
 app.use('/api/v1', productRoute);
 app.use('/api/v1', orderRoute);
 app.use('/api/v1', messageRoute);
+app.use('/api/v1', messageRoute);
 
 app.use(error);
 
-// Socket.IO setup for handling real-time messages
 let users = [];
 
 io.on('connection', (socket) => {
