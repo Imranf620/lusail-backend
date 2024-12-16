@@ -18,10 +18,7 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Product not found!", 404));
   }
 
-  const productWithSeller = await ProductModel.findById(id).populate(
-    "seller",
-    "name email"
-  );
+  const productWithSeller = await ProductModel.findById(id).populate("seller", "name email");
   const seller = productWithSeller.seller;
 
   if (!seller) {

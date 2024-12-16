@@ -25,15 +25,19 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
+// i have added method and allowedHeader in this io cors
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONT_END_URL,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
   },
 });
 
+app.set('io', io);
 app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
@@ -45,6 +49,11 @@ v2.config({
 });
 
 app.use(express.json({ limit: '50mb' }));
+app.use(
+  fileUpload({
+    useTempFiles: false,
+  })
+);
 app.use(
   fileUpload({
     useTempFiles: false,
@@ -62,6 +71,7 @@ app.use(
 app.use('/api/v1', userRoute);
 app.use('/api/v1', productRoute);
 app.use('/api/v1', orderRoute);
+app.use('/api/v1', messageRoute);
 app.use('/api/v1', messageRoute);
 
 app.use(error);
@@ -99,10 +109,6 @@ io.on('connection', (socket) => {
     users = users.filter((user) => user.socketId !== socket.id);
   });
 });
-
-app.get('/', (req, res) => {
-  res.send('API is running...');
-})
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
