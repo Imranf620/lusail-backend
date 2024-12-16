@@ -8,7 +8,13 @@ export const appSignup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role, phone } = req.body;
   const file = req.files?.image;
 
-  const result = await v2.uploader.upload(file.data, {
+  // Convert file data to Base64 format
+  const fileBase64 = `data:${file.mimetype};base64,${file.data.toString(
+    'base64'
+  )}`;
+
+  // Upload to Cloudinary
+  const result = await v2.uploader.upload(fileBase64, {
     folder: 'User Profiles',
     resource_type: 'auto',
   });
@@ -138,7 +144,13 @@ export const Signup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role } = req.body;
   const file = req.files?.image;
 
-  const result = await v2.uploader.upload(file.data, {
+  // Convert file data to Base64 format
+  const fileBase64 = `data:${file.mimetype};base64,${file.data.toString(
+    'base64'
+  )}`;
+
+  // Upload to Cloudinary
+  const result = await v2.uploader.upload(fileBase64, {
     folder: 'User Profiles',
     resource_type: 'auto',
   });

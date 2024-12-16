@@ -28,7 +28,7 @@ const server = http.createServer(app);
 // i have added method and allowedHeader in this io cors
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONT_END_URL,
+    origin: process.env.FRONT_END_URL || 'http://localhost:5000',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
@@ -55,7 +55,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.FRONT_END_URL,
+    origin: process.env.FRONT_END_URL || 'http://localhost:5000',
     credentials: true,
   })
 );
