@@ -1,28 +1,33 @@
-import UserModel from '../Model/UserModel.js';
-import ErrorHandler from '../utils/ErrorHandler.js';
-import { sendMail } from '../sendCustomMail.js';
-import { catchAsyncError } from '../Middleware/CatchAsyncError.js';
-import { v2 } from 'cloudinary';
+import UserModel from "../Model/UserModel.js";
+import ErrorHandler from "../utils/ErrorHandler.js";
+import { sendMail } from "../sendCustomMail.js";
+import { catchAsyncError } from "../Middleware/CatchAsyncError.js";
+import { v2 } from "cloudinary";
 
 export const appSignup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role, phone } = req.body;
-  const file = req.files.image;
+  const file = req.files?.image;
 
-  const result = await v2.uploader.upload(file.tempFilePath, {
-    folder: 'User Profiles',
+  const fileBase64 = `data:${file.mimetype};base64,${file.data.toString(
+    "base64"
+  )}`;
+
+  const result = await v2.uploader.upload(fileBase64, {
+    folder: "User Profiles",
+    resource_type: "auto",
   });
 
   if (!email) {
-    return next(new ErrorHandler('invalid detail', 500));
+    return next(new ErrorHandler("invalid detail", 500));
   }
 
   const deletedUser = await UserModel.findOneAndDelete({
     email: email,
-    status: 'unverified',
+    status: "unverified",
   });
 
   if (deletedUser) {
-    console.log('User successfully deleted:', deletedUser);
+    console.log("User successfully deleted:", deletedUser);
   }
 
   const user = await UserModel.create({
@@ -38,14 +43,14 @@ export const appSignup = catchAsyncError(async (req, res, next) => {
 
   await user.save();
 
-  const subject = 'Welcome to Our Website!';
+  const subject = "Welcome to Our Website!";
   const text = `Hello ${name},\n\nThank you for joining us at Lusail Number plates! We're excited to have you on board and look forward to providing you with a fantastic experience.\n\nTo complete your registration, please use the OTP below for verification:\n\n<h2 style="font-size: 36px; font-weight: bold; color: #4CAF50;">${otp}</h2>\n\nIf you need any assistance, feel free to reach out to us. We're here to help!\n\nBest regards,\nThe Lusail Numbers plate Team`;
 
   await sendMail({ to: email, subject, text });
 
   res.status(200).json({
     success: true,
-    message: 'User registered successfully',
+    message: "User registered successfully",
     user,
   });
 });
@@ -54,18 +59,18 @@ export const appVerifyUser = catchAsyncError(async (req, res, next) => {
   const { otp, email } = req.body;
 
   if (!otp) {
-    return next(new ErrorHandler('Please enter your OTP', 400));
+    return next(new ErrorHandler("Please enter your OTP", 400));
   }
 
   const user = await UserModel.findOne({ email });
   if (!user) {
-    return next(new ErrorHandler('User with this email not found!', 404));
+    return next(new ErrorHandler("User with this email not found!", 404));
   }
 
   if (new Date() > user.otpExpires) {
     return res.status(400).json({
       success: false,
-      message: 'OTP has expired. Please request a new OTP.',
+      message: "OTP has expired. Please request a new OTP.",
       resendOTP: true,
     });
   }
@@ -73,7 +78,7 @@ export const appVerifyUser = catchAsyncError(async (req, res, next) => {
   if (user.otp === otp) {
     user.otp = undefined;
     user.otpExpires = undefined;
-    user.status = 'verified';
+    user.status = "verified";
     await user.save();
 
     const token = user.getJWTToken();
@@ -83,14 +88,14 @@ export const appVerifyUser = catchAsyncError(async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Welcome to Lusail Number plates.',
+      message: "Welcome to Lusail Number plates.",
       token,
       expiresIn,
     });
   } else {
     return res.status(400).json({
       success: false,
-      message: 'Wrong OTP. Please try again.',
+      message: "Wrong OTP. Please try again.",
     });
   }
 });
@@ -98,21 +103,21 @@ export const appVerifyUser = catchAsyncError(async (req, res, next) => {
 export const appLogin = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
 
-  const user = await UserModel.findOne({ email }).select('+password');
+  const user = await UserModel.findOne({ email }).select("+password");
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: 'User not found',
+      message: "User not found",
     });
   }
 
-  if (user.status === 'unverified') {
-    return next(new ErrorHandler('User not found please Signup again!', 401));
+  if (user.status === "unverified") {
+    return next(new ErrorHandler("User not found please Signup again!", 401));
   }
 
   const isPasswordMatch = await user.comparePassword(password);
   if (!isPasswordMatch) {
-    return next(new ErrorHandler('Password mismatch', 400));
+    return next(new ErrorHandler("Password mismatch", 400));
   }
   const token = user.getJWTToken();
 
@@ -121,13 +126,13 @@ export const appLogin = catchAsyncError(async (req, res, next) => {
 
   res
     .status(200)
-    .cookie('token', token, {
+    .cookie("token", token, {
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days
       httpOnly: true,
     })
     .json({
       success: true,
-      message: 'User logged in successfully',
+      message: "User logged in successfully",
       user,
       token,
     });
@@ -135,24 +140,25 @@ export const appLogin = catchAsyncError(async (req, res, next) => {
 
 export const Signup = catchAsyncError(async (req, res, next) => {
   const { name, email, password, role } = req.body;
-  const file = req.files.image;
+  const file = req.files?.image;
 
-  const result = await v2.uploader.upload(file.tempFilePath, {
-    folder: 'User Profiles',
+  const fileBase64 = `data:${file.mimetype};base64,${file.data.toString(
+    "base64"
+  )}`;
+
+  const result = await v2.uploader.upload(fileBase64, {
+    folder: "User Profiles",
+    resource_type: "auto",
   });
 
   if (!email) {
-    return next(new ErrorHandler('invalid detail', 500));
+    return next(new ErrorHandler("invalid detail", 500));
   }
 
   const deletedUser = await UserModel.findOneAndDelete({
     email: email,
-    status: 'unverified',
+    status: "unverified",
   });
-
-  if (deletedUser) {
-    console.log('User successfully deleted:', deletedUser);
-  }
 
   const user = await UserModel.create({
     name,
@@ -166,14 +172,14 @@ export const Signup = catchAsyncError(async (req, res, next) => {
 
   await user.save();
 
-  const subject = 'Welcome to Our Website!';
+  const subject = "Welcome to Our Website!";
   const text = `Hello ${name},\n\nThank you for joining us at Lusail Number plates! We're excited to have you on board and look forward to providing you with a fantastic experience.\n\nTo complete your registration, please use the OTP below for verification:\n\n<h2 style="font-size: 36px; font-weight: bold; color: #4CAF50;">${otp}</h2>\n\nIf you need any assistance, feel free to reach out to us. We're here to help!\n\nBest regards,\nThe Lusail Numbers plate Team`;
 
   await sendMail({ to: email, subject, text });
 
   res.status(200).json({
     success: true,
-    message: 'User registered successfully',
+    message: "User registered successfully",
     user,
   });
 });
@@ -182,18 +188,18 @@ export const verifyUser = catchAsyncError(async (req, res, next) => {
   const { otp, email } = req.body;
 
   if (!otp) {
-    return next(new ErrorHandler('Please enter your otp', 400));
+    return next(new ErrorHandler("Please enter your otp", 400));
   }
 
   const user = await UserModel.findOne({ email });
   if (!user) {
-    return next(new ErrorHandler('User with this email not found!', 404));
+    return next(new ErrorHandler("User with this email not found!", 404));
   }
 
   if (Date.now() > user.otpExpires) {
     return res.status(400).json({
       success: false,
-      message: 'OTP has expired. Please request a new OTP.',
+      message: "OTP has expired. Please request a new OTP.",
       resendOTP: true,
     });
   }
@@ -203,24 +209,24 @@ export const verifyUser = catchAsyncError(async (req, res, next) => {
   if (user.otp === otp) {
     user.otp = undefined;
     user.otpExpires = undefined;
-    user.status = 'verified';
+    user.status = "verified";
     await user.save();
 
     res
       .status(200)
-      .cookie('token', token, {
+      .cookie("token", token, {
         expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
         httpOnly: true,
       })
       .json({
         success: true,
-        message: 'Welcome to Lusail Number plates.',
+        message: "Welcome to Lusail Number plates.",
         token,
       });
   } else {
     return res.status(400).json({
       success: false,
-      message: 'Wrong OTP. Please try again.',
+      message: "Wrong OTP. Please try again.",
     });
   }
 });
@@ -230,54 +236,54 @@ export const resendOTP = catchAsyncError(async (req, res, next) => {
 
   const user = await UserModel.findOne({ email });
   if (!user) {
-    return next(new ErrorHandler('User with this email not found!', 404));
+    return next(new ErrorHandler("User with this email not found!", 404));
   }
 
   // Generate new OTP
   const otp = user.generateOTP();
   await user.save();
 
-  const subject = 'Resend OTP';
+  const subject = "Resend OTP";
   const text = `Hello ${user.name},\n\nHere is your new OTP for verification:\n\n<h2>${otp}</h2>\n\nThis OTP is valid for 5 minutes.\n\nBest regards,\nThe Lusail Numbers plate Team`;
 
   await sendMail({ to: user.email, subject, text });
 
   res.status(200).json({
     success: true,
-    message: 'A new OTP has been sent to your email.',
+    message: "A new OTP has been sent to your email.",
   });
 });
 
 export const Login = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
 
-  const user = await UserModel.findOne({ email }).select('+password');
+  const user = await UserModel.findOne({ email }).select("+password");
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: 'User not found',
+      message: "User not found",
     });
   }
 
-  if (user.status === 'unverified') {
-    return next(new ErrorHandler('User not found please Signup again!', 401));
+  if (user.status === "unverified") {
+    return next(new ErrorHandler("User not found please Signup again!", 401));
   }
 
   const isPasswordMatch = await user.comparePassword(password);
   if (!isPasswordMatch) {
-    return next(new ErrorHandler('Password mismatch', 400));
+    return next(new ErrorHandler("Password mismatch", 400));
   }
   const token = user.getJWTToken();
 
   res
     .status(200)
-    .cookie('token', token, {
+    .cookie("token", token, {
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days
       httpOnly: true,
     })
     .json({
       success: true,
-      message: 'User logged in successfully',
+      message: "User logged in successfully",
       user,
     });
 });
@@ -294,7 +300,7 @@ export const GetallUsers = catchAsyncError(async (req, res, next) => {
 
 export const Logout = catchAsyncError(async (req, res, next) => {
   const user = await UserModel.findById(req.user._id);
-  res.cookie('token', null, {
+  res.cookie("token", null, {
     httpOnly: true,
     expires: new Date(Date.now()),
   });
@@ -304,7 +310,7 @@ export const Logout = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: 'User logged out successfully',
+    message: "User logged out successfully",
   });
 });
 
@@ -320,7 +326,7 @@ export const MyProfile = catchAsyncError(async (req, res, next) => {
 export const UpdateProfile = catchAsyncError(async (req, res, next) => {
   const user = await UserModel.findById(req.user._id);
   if (!user) {
-    return next(new ErrorHandler('User not found', 404));
+    return next(new ErrorHandler("User not found", 404));
   }
 
   const updatedUser = await UserModel.findByIdAndUpdate(
@@ -345,23 +351,23 @@ export const UpdatePassword = catchAsyncError(async (req, res, next) => {
 
   if (!oldPassword || !password || !confirmPassword) {
     return next(
-      new ErrorHandler('Please provide all the required fields', 400)
+      new ErrorHandler("Please provide all the required fields", 400)
     );
   }
 
-  let user = await UserModel.findById(req.user._id).select('+password');
+  let user = await UserModel.findById(req.user._id).select("+password");
 
   if (!user) {
-    return next(new ErrorHandler('User not found', 404));
+    return next(new ErrorHandler("User not found", 404));
   }
 
   const isPasswordMatch = await user.comparePassword(oldPassword);
   if (!isPasswordMatch) {
-    return next(new ErrorHandler('Old password is incorrect', 400));
+    return next(new ErrorHandler("Old password is incorrect", 400));
   }
 
   if (password !== confirmPassword) {
-    return next(new ErrorHandler('Passwords do not match', 400));
+    return next(new ErrorHandler("Passwords do not match", 400));
   }
 
   user.password = password;
@@ -369,7 +375,7 @@ export const UpdatePassword = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: 'Password updated successfully',
+    message: "Password updated successfully",
   });
 });
 
@@ -377,12 +383,12 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
   const { email } = req.body;
 
   if (!email) {
-    return next(new ErrorHandler('Please provide an email address', 400));
+    return next(new ErrorHandler("Please provide an email address", 400));
   }
 
   let user = await UserModel.findOne({ email });
   if (!user) {
-    return next(new ErrorHandler('User not found with this email', 404));
+    return next(new ErrorHandler("User not found with this email", 404));
   }
 
   const OTP = user.generateOTP();
@@ -399,7 +405,7 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
 `;
     await sendMail({
       to: email,
-      subject: 'Password Reset OTP',
+      subject: "Password Reset OTP",
       text: message,
     });
 
@@ -412,7 +418,7 @@ export const ForgetPassword = catchAsyncError(async (req, res, next) => {
     user.otpExpires = undefined;
     await user.save({ validateBeforeSave: false });
 
-    return next(new ErrorHandler('Failed to send OTP email', 500));
+    return next(new ErrorHandler("Failed to send OTP email", 500));
   }
 });
 
@@ -420,16 +426,16 @@ export const VerifyOTP = catchAsyncError(async (req, res, next) => {
   const { otp, email } = req.body;
 
   if (!otp || !email) {
-    return next(new ErrorHandler('Please provide email and OTP', 400));
+    return next(new ErrorHandler("Please provide email and OTP", 400));
   }
 
   let user = await UserModel.findOne({ email });
   if (!user) {
-    return next(new ErrorHandler('User not found', 404));
+    return next(new ErrorHandler("User not found", 404));
   }
 
   if (user.otp !== otp || user.otpExpires < Date.now()) {
-    return next(new ErrorHandler('Invalid or expired OTP', 400));
+    return next(new ErrorHandler("Invalid or expired OTP", 400));
   }
 
   user.otp = undefined;
@@ -438,7 +444,7 @@ export const VerifyOTP = catchAsyncError(async (req, res, next) => {
 
   return res.status(200).json({
     success: true,
-    message: 'OTP verified successfully',
+    message: "OTP verified successfully",
   });
 });
 
@@ -448,7 +454,7 @@ export const ResetPassword = catchAsyncError(async (req, res, next) => {
   const user = await UserModel.findOne({ email });
 
   if (!newPassword) {
-    return next(new ErrorHandler('Password required', 400));
+    return next(new ErrorHandler("Password required", 400));
   }
 
   user.password = newPassword;
@@ -456,14 +462,14 @@ export const ResetPassword = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: 'Password reset successfully',
+    message: "Password reset successfully",
   });
 });
 
 export const GetSingleUser = catchAsyncError(async (req, res, next) => {
   const user = await UserModel.findById(req.params.id);
   if (!user) {
-    return next(new ErrorHandler('User not found', 404));
+    return next(new ErrorHandler("User not found", 404));
   }
   res.status(200).json({
     success: true,
@@ -474,24 +480,24 @@ export const GetSingleUser = catchAsyncError(async (req, res, next) => {
 export const DeleteOwnProfile = catchAsyncError(async (req, res, next) => {
   const user = await UserModel.findByIdAndDelete(req.user._id);
   if (!user) {
-    return next(new ErrorHandler('User not found', 404));
+    return next(new ErrorHandler("User not found", 404));
   }
 
   res.status(200).json({
     success: true,
-    message: 'User and associated products deleted successfully',
+    message: "User and associated products deleted successfully",
   });
 });
 
 export const DeleteUserProfile = catchAsyncError(async (req, res, next) => {
   const user = await UserModel.findByIdAndDelete(req.params.id);
   if (!user) {
-    return next(new ErrorHandler('User not found', 404));
+    return next(new ErrorHandler("User not found", 404));
   }
 
   res.status(200).json({
     success: true,
-    message: 'User and associated products deleted successfully',
+    message: "User and associated products deleted successfully",
   });
 });
 
@@ -507,11 +513,11 @@ export const UpdateUserProfile = catchAsyncError(async (req, res, next) => {
   );
 
   if (!user) {
-    return next(new ErrorHandler('User not found', 404));
+    return next(new ErrorHandler("User not found", 404));
   }
   res.status(200).json({
     success: true,
-    message: 'User updated successfully',
+    message: "User updated successfully",
     user,
   });
 });

@@ -24,14 +24,18 @@ process.on('uncaughtException', (err) => {
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
+
+// i have added method and allowedHeader in this io cors
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONT_END_URL,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
     credentials: true,
   },
 });
 
-app.set('io', io); // Set io instance to app
+app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
 
@@ -42,7 +46,11 @@ v2.config({
 });
 
 app.use(express.json({ limit: '50mb' }));
-app.use(fileUpload({ useTempFiles: true }));
+app.use(
+  fileUpload({
+    useTempFiles: false,
+  })
+);
 app.use(cookieParser());
 
 app.use(
@@ -55,7 +63,7 @@ app.use(
 app.use('/api/v1', userRoute);
 app.use('/api/v1', productRoute);
 app.use('/api/v1', orderRoute);
-app.use('/api/v1', messageRoute); // Use message route
+app.use('/api/v1', messageRoute);
 
 app.use(error);
 
@@ -65,13 +73,11 @@ let users = [];
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // Handle user join event
   socket.on('join', (userId) => {
     users.push({ userId, socketId: socket.id });
     console.log(`${userId} joined the chat.`);
   });
 
-  // Handle sending a new message
   socket.on('sendMessage', async (message) => {
     try {
       const newMessage = await Message.create({
@@ -80,7 +86,6 @@ io.on('connection', (socket) => {
         content: message.content,
       });
 
-      // Find the receiver's socketId
       const receiver = users.find((user) => user.userId === message.receiverId);
 
       if (receiver) {
@@ -91,16 +96,11 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle user disconnect
   socket.on('disconnect', () => {
     console.log('User disconnected');
     users = users.filter((user) => user.socketId !== socket.id);
   });
 });
-
-app.get('/', (req, res) => {
-  res.send('API is running...');
-})
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
