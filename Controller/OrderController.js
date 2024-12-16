@@ -10,24 +10,16 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
 
   // Validate inputs
   if (!id || !buyer) {
-    return next(
-      new ErrorHandler('Invalid input: Product ID and buyer are required.', 400)
-    );
+    return next(new ErrorHandler('Invalid input: Product ID and buyer are required.', 400));
   }
 
-  // Find the product
-  const findProduct = await ProductModel.findById(id);
+  // Fetch product along with seller details
+  const findProduct = await ProductModel.findById(id).populate('seller', 'name email');
   if (!findProduct) {
     return next(new ErrorHandler('Product not found!', 404));
   }
 
-  // Get product seller details
-  const productWithSeller = await ProductModel.findById(id).populate(
-    'seller',
-    'name email'
-  );
-  const seller = productWithSeller.seller;
-
+  const seller = findProduct.seller;
   if (!seller) {
     return next(new ErrorHandler('Seller not found for this product.', 404));
   }
@@ -42,76 +34,63 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
     discountedPrice: findProduct.discountedPrice,
   });
 
+  // Populate the order details
   const populatedOrder = await OrderModel.findById(order._id)
     .populate('seller', 'name email')
     .populate('buyer', 'name email')
     .populate('plateNO', 'plateNo');
 
-  order.sellerName = populatedOrder.seller.name;
-  order.buyerName = populatedOrder.buyer.name;
-  order.plateNoDetails = populatedOrder.plateNO.plateNo;
-  await order.save();
+  // Prepare the order summary
+  const { buyerName, sellerName, plateNoDetails } = {
+    buyerName: populatedOrder.buyer.name,
+    sellerName: populatedOrder.seller.name,
+    plateNoDetails: populatedOrder.plateNO.plateNo,
+  };
 
-  // Prepare email messages
+  // Email preparation
   const adminEmail = 'info@lusailnumbers.com';
   const sellerEmail = seller.email;
   const buyerEmail = buyer.email;
 
-  // Buyer email
   const buyerMessage = `
-    <p>Dear ${populatedOrder.buyerName},</p>
-    <p>Thank you for placing an order on Lusail Numbers!</p>
-    <p>Your order for the number plate <strong>${populatedOrder.plateNoDetails}</strong> has been successfully placed. Our team will contact you shortly with further details.</p>
-    <p>Best regards,<br>Lusail Numbers Team</p>
+    <p style='color:rgb(0, 0, 0);'>Dear ${buyerName},</p>
+    <p style='color:rgb(0, 0, 0);'>Thank you for placing an order on Lusail Numbers!</p>
+    <p style='color:rgb(0, 0, 0);'>Your order for the \n\n<pre style='font-size: 17px; color:rgb(0, 0, 0); display: flex; align-items: center;'>Plate Number: <strong style='font-size: 20px; color: #570007;'>${plateNoDetails}</strong></pre>\n\n has been successfully placed. Our team will contact you shortly with further details.</p>
+    <p style='color:rgb(0, 0, 0);'>Best regards,<br>Lusail Numbers Team</p>
   `;
 
-  // Admin email
   const adminMessage = `
     <p>Dear Admin,</p>
     <p>A new order has been placed on Lusail Numbers!</p>
-    <p>Buyer Name: <strong>${populatedOrder.buyerName}</strong></p>
-    <p>Seller Name: <strong>${populatedOrder.sellerName}</strong></p>
-    <p>Number Plate: <strong>${populatedOrder.plateNoDetails}</strong></p>
+    <p>Buyer Name: <strong>${buyerName}</strong></p>
+    <p>Seller Name: <strong>${sellerName}</strong></p>
+    <p>Number Plate: <strong>${plateNoDetails}</strong></p>
     <p>Please proceed with the necessary steps to process the order.</p>
     <p>Best regards,<br>Lusail Numbers Team</p>
   `;
 
-  // Seller email
   const sellerMessage = `
-    <p>Dear ${populatedOrder.sellerName},</p>
+    <p>Dear ${sellerName},</p>
     <p>We are excited to inform you that a new order has been placed on Lusail Numbers!</p>
-    <p>Buyer Name: <strong>${populatedOrder.buyerName}</strong></p>
-    <p>Number Plate: <strong>${populatedOrder.plateNoDetails}</strong></p>
+    <p>Buyer Name: <strong>${buyerName}</strong></p>
+    <p>Number Plate: <strong>${plateNoDetails}</strong></p>
     <p>Please review the order details and proceed with the necessary steps.</p>
     <p>Best regards,<br>Lusail Numbers Team</p>
   `;
 
   // Send emails
-  await sendMail({
-    to: buyerEmail,
-    subject: 'Order Confirmation - Lusail Numbers',
-    text: buyerMessage,
-  });
-
-  await sendMail({
-    to: adminEmail,
-    subject: 'New Order Notification - Lusail Numbers',
-    text: adminMessage,
-  });
-
-  await sendMail({
-    to: sellerEmail,
-    subject: 'Order Notification - Lusail Numbers',
-    text: sellerMessage,
-  });
+  await sendMail({ to: buyerEmail, subject: 'Order Confirmation - Lusail Numbers', text: buyerMessage });
+  await sendMail({ to: adminEmail, subject: 'New Order Notification - Lusail Numbers', text: adminMessage });
+  await sendMail({ to: sellerEmail, subject: 'Order Notification - Lusail Numbers', text: sellerMessage });
 
   // Response
   res.status(201).json({
     success: true,
     message: 'Order created successfully',
-    order,
+    order: { ...populatedOrder.toObject(), buyerName, sellerName, plateNoDetails },
   });
 });
+
 
 export const userOrders = catchAsyncError(async (req, res, next) => {
   try {
