@@ -22,7 +22,7 @@ process.on('uncaughtException', (err) => {
 });
 
 dotenv.config();
-const clientURL = process.env.Production ? process.env.FRONT_END_URL : 'http://localhost:5000';
+const clientURL = process.env.Production === 'true' ? process.env.FRONT_END_URL : 'http://localhost:5000';
 console.log(clientURL);
 const app = express();
 const server = http.createServer(app);
