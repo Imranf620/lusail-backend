@@ -22,15 +22,13 @@ process.on('uncaughtException', (err) => {
 });
 
 dotenv.config();
-const clientURL = process.env.Production === 'true' ? process.env.FRONT_END_URL : 'http://localhost:5000';
-console.log(clientURL);
 const app = express();
 const server = http.createServer(app);
 
 // i have added method and allowedHeader in this io cors
 const io = new Server(server, {
   cors: {
-    origin: clientURL,
+    origin: process.env.FRONT_END_URL || 'http://localhost:3000',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
@@ -55,9 +53,10 @@ app.use(
   })
 );
 app.use(cookieParser());
+
 app.use(
   cors({
-    origin: clientURL,
+    origin: process.env.FRONT_END_URL || 'http://localhost:3000',
     credentials: true,
   })
 );
@@ -67,8 +66,10 @@ app.use('/api/v1', productRoute);
 app.use('/api/v1', orderRoute);
 app.use('/api/v1', messageRoute);
 
-app.use(error);
-
+app.use(error);``
+app.get("/", (req, res) => {
+  res.send("API is running....");
+});
 // Socket.IO setup for handling real-time messages
 let users = [];
 
