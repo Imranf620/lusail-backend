@@ -22,13 +22,15 @@ process.on('uncaughtException', (err) => {
 });
 
 dotenv.config();
+const clientURL = process.env.Production ? process.env.FRONT_END_URL : 'http://localhost:5000';
+console.log(clientURL);
 const app = express();
 const server = http.createServer(app);
 
 // i have added method and allowedHeader in this io cors
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONT_END_URL || 'http://localhost:5000',
+    origin: clientURL,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
@@ -48,14 +50,14 @@ v2.config({
 app.use(express.json({ limit: '50mb' }));
 app.use(
   fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
     useTempFiles: false,
   })
 );
 app.use(cookieParser());
-
 app.use(
   cors({
-    origin: process.env.FRONT_END_URL || 'http://localhost:5000',
+    origin: clientURL,
     credentials: true,
   })
 );
