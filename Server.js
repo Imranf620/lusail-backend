@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -16,19 +15,34 @@ import error from './Middleware/error.js';
 import { v2 } from 'cloudinary';
 import Message from './Model/MessageModal.js';
 
+// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
   console.error(`Uncaught exception: ${err.message}`);
   process.exit(1);
 });
 
+// Load environment variables
 dotenv.config();
+
+// Ensure required environment variables are present
+if (!process.env.FRONT_END_URL || !process.env.Cloud_Name || !process.env.Cloud_API_Key || !process.env.API_Secret_Key) {
+  console.error('Missing required environment variables');
+  process.exit(1); // Exit if essential environment variables are missing
+}
+
 const app = express();
 const server = http.createServer(app);
 
-// i have added method and allowedHeader in this io cors
+// CORS setup for Express API
+app.use(cors({
+  origin: process.env.FRONT_END_URL,
+  credentials: true,
+}));
+
+// Socket.IO setup with CORS
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONT_END_URL ,
+    origin: process.env.FRONT_END_URL,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
@@ -37,38 +51,33 @@ const io = new Server(server, {
 
 app.set('io', io);
 
-const PORT = process.env.PORT || 5000;
-
+// Cloudinary configuration
 v2.config({
   cloud_name: process.env.Cloud_Name,
   api_key: process.env.Cloud_API_Key,
   api_secret: process.env.API_Secret_Key,
 });
 
+// Middlewares
 app.use(express.json({ limit: '50mb' }));
+app.use(cookieParser());
 app.use(
   fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 },
     useTempFiles: false,
   })
 );
-app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: process.env.FRONT_END_URL ,
-    credentials: true,
-  })
-);
-
+// Routes
 app.use('/api/v1', userRoute);
 app.use('/api/v1', productRoute);
 app.use('/api/v1', orderRoute);
 app.use('/api/v1', messageRoute);
 
+// Error handling middleware
 app.use(error);
 
-// Socket.IO setup for handling real-time messages
+// Socket.IO event handlers
 let users = [];
 
 io.on('connection', (socket) => {
@@ -103,13 +112,15 @@ io.on('connection', (socket) => {
   });
 });
 
+// Start server
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   ConnectDB();
 });
 
+// Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  console.log('Server rejected');
   console.error(`Unhandled Rejection: ${err.message}`);
   server.close(() => {
     process.exit(1);
