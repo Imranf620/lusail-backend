@@ -15,7 +15,7 @@ import error from './Middleware/error.js';
 import { v2 } from 'cloudinary';
 import Message from './Model/MessageModal.js';
 
-// Handle uncaught exceptions early
+// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
   console.error(`Uncaught exception: ${err.message}`);
   process.exit(1);
@@ -74,7 +74,7 @@ app.use('/api/v1', productRoute);
 app.use('/api/v1', orderRoute);
 app.use('/api/v1', messageRoute);
 
-// Error handling middleware (should be placed after routes)
+// Error handling middleware
 app.use(error);
 
 // Socket.IO event handlers
@@ -119,7 +119,7 @@ server.listen(PORT, () => {
   ConnectDB();
 });
 
-// Handle unhandled promise rejections (should be placed at the bottom)
+// Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error(`Unhandled Rejection: ${err.message}`);
   server.close(() => {
