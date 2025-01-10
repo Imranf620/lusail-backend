@@ -21,7 +21,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-// Load environment variables
+// Load environment variabless
 dotenv.config();
 
 // Ensure required environment variables are present
@@ -48,6 +48,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
 
 app.set('io', io);
 
